@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0  
 **Status:** `DRAFT`  
-**Stack:** TypeScript, Next.js, tRPC, PostgreSQL
+**Stack:** TypeScript, Next.js, tRPC, Firestore
 
 ---
 
@@ -45,13 +45,13 @@ Current fitness applications suffer from:
 
 ## 4. Technical Architecture
 
-| Layer         | Technology          | Reason                                                 |
-| :------------ | :------------------ | :----------------------------------------------------- |
-| **Frontend**  | React (Next.js)     | SEO for public exercise pages + fast hydration.        |
-| **API Layer** | **tRPC**            | End-to-end typesafety for complex workout schemas.     |
-| **Database**  | PostgreSQL + Prisma | Relational data is vital for tracking Set/Rep history. |
-| **Auth**      | NextAuth.js         | Secure integration with Google/Apple/Passkeys.         |
-| **State**     | TanStack Query      | Superior caching for "offline-first" logging.          |
+| Layer         | Technology         | Reason                                                 |
+| :------------ | :----------------- | :----------------------------------------------------- |
+| **Frontend**  | React (Next.js)    | SEO for public exercise pages + fast hydration.        |
+| **API Layer** | **tRPC**           | End-to-end typesafety for complex workout schemas.     |
+| **Database**  | Firestore + Prisma | Relational data is vital for tracking Set/Rep history. |
+| **Auth**      | NextAuth.js        | Secure integration with Google/Apple/Passkeys.         |
+| **State**     | TanStack Query     | Superior caching for "offline-first" logging.          |
 
 ---
 

@@ -48,7 +48,7 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 - **Acceptance Criteria:**
   - [ ] User can log in via OAuth provider.
   - [ ] Session persists on page refresh.
-  - [ ] User record is created in PostgreSQL `User` table.
+  - [ ] User record is created in Firestore `User` table.
 
 #### **US-1.3: Database Schema Design**
 
