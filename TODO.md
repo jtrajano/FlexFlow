@@ -1,6 +1,6 @@
 # 🚀 Agile Project Breakdown: **FlexFlow**
 
-**Project Goal:** Build a high-performance strength & recovery intelligence application.
+**Project Goal:** Build a high-performance strength & recovery intelligence application, with all business logic in the frontend and data managed by Firestore and Firebase Auth.
 **Methodology:** Agile / Scrum
 **Cadence:** 2-Week Sprints
 
@@ -16,7 +16,7 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 
 | ID       | Epic Name                  | Description                                               | Priority    |
 | :------- | :------------------------- | :-------------------------------------------------------- | :---------- |
-| **E-01** | **Foundation & Identity**  | Monorepo setup, Database schema, Auth, and CI/CD.         | 🔴 Critical |
+| **E-01** | **Foundation & Identity**  | Monorepo setup, Firestore rules, Auth, and CI/CD.         | 🔴 Critical |
 | **E-02** | **The Workout Engine**     | The core logging interface, exercise database, and timer. | 🔴 Critical |
 | **E-03** | **Readiness Intelligence** | The algorithm, wearable integration, and manual survey.   | 🟡 High     |
 | **E-04** | **Progress Analytics**     | Visualizing volume, PRs, and history.                     | 🟢 Medium   |
@@ -31,34 +31,32 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 #### **US-1.1: Monorepo & Stack Initialization**
 
 > **As a** Developer,
-> **I want** to initialize a Turborepo with Next.js (Web), tRPC (API), and Prisma (DB),
+> **I want** to initialize a Turborepo with Vite (Web), Firestore (DB), and Firebase Auth,
 > **So that** I have a typesafe development environment to build features upon.
 
 - **Acceptance Criteria:**
   - [ ] `pnpm build` passes for all workspaces.
-  - [ ] tRPC router responds to a "hello world" query.
   - [ ] ESLint and Prettier are configured.
 
 #### **US-1.2: User Authentication**
 
 > **As a** User,
-> **I want** to sign up using Google or Apple via NextAuth.js,
+> **I want** to sign up using Google, Apple, or Email via Firebase Auth,
 > **So that** my workout data is securely saved and accessible across devices.
 
 - **Acceptance Criteria:**
-  - [ ] User can log in via OAuth provider.
+  - [ ] User can log in via OAuth or Email provider.
   - [ ] Session persists on page refresh.
-  - [ ] User record is created in Firestore `User` table.
+  - [ ] User record is created in Firestore `users` collection.
 
-#### **US-1.3: Database Schema Design**
+#### **US-1.3: Firestore Security Rules**
 
 > **As a** Developer,
-> **I want** to define the Prisma schema for `User`, `Workout`, `Exercise`, and `Set`,
-> **So that** we can store complex relational data efficiently.
+> **I want** to define Firestore security rules for `users`, `workouts`, and `exercises`,
+> **So that** only authenticated users can access their own data.
 
 - **Acceptance Criteria:**
-  - [ ] Schema migration runs successfully.
-  - [ ] Relations (e.g., One User -> Many Workouts) work as expected.
+  - [ ] Rules deployed and tested for all collections.
 
 ---
 
@@ -83,7 +81,7 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 - **Acceptance Criteria:**
   - [ ] Input fields validate numbers (Zod).
   - [ ] "Save" triggers an optimistic UI update.
-  - [ ] Data persists to DB via tRPC mutation.
+  - [ ] Data persists to Firestore.
 
 #### **US-2.3: The Rest Timer**
 
@@ -126,8 +124,7 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 > **So that** I don't have to manually enter data.
 
 - **Acceptance Criteria:**
-  - [ ] Backend service successfully pulls/receives webhooks.
-  - [ ] Data is normalized into `ReadinessScore`.
+  - [ ] Data is normalized and saved to Firestore.
 
 #### **US-3.3: The "Pre-Workout" Advice Card**
 
@@ -175,7 +172,7 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 
 - **Acceptance Criteria:**
   - [ ] Toggle switch changes all displayed weights.
-  - [ ] Settings persist in DB.
+  - [ ] Settings persist in Firestore.
 
 #### **US-5.2: Workout Summary Share**
 
@@ -190,9 +187,9 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 
 ## 🏃‍♂️ Suggested Sprint 1 (The "Walking Skeleton")
 
-**Goal:** Establish a working end-to-end prototype where a user can log in and save a single number to the database.
+**Goal:** Establish a working end-to-end prototype where a user can log in and save a single number to Firestore.
 
 1.  **US-1.1:** Repo Setup
-2.  **US-1.2:** Auth (NextAuth)
-3.  **US-1.3:** DB Schema (Prisma)
+2.  **US-1.2:** Auth (Firebase Auth)
+3.  **US-1.3:** Firestore Security Rules
 4.  **US-2.2:** Real-Time Set Logging (Basic version, no offline support yet)

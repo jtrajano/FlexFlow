@@ -1,14 +1,14 @@
 # 📋 Product Design Document: **FlexFlow**
 
-**Version:** 1.0.0  
+**Version:** 2.0.0  
 **Status:** `DRAFT`  
-**Stack:** TypeScript, Next.js, tRPC, Firestore
+**Stack:** TypeScript, React, Vite, Firestore, Firebase Auth
 
 ---
 
 ## 1. Executive Summary
 
-**FlexFlow** is a mobile-first web application designed to bridge the gap between heavy lifting and recovery. Unlike generic trackers, FlexFlow uses **AI-driven readiness scores** to suggest whether a user should push for a Personal Record (PR) or take a deload day.
+**FlexFlow** is a mobile-first web application designed to bridge the gap between heavy lifting and recovery. All business logic and data access are handled in the frontend React app, leveraging Firebase Authentication and Firestore for secure, scalable, serverless data management. No custom backend or server functions are used; all access is controlled via Firestore security rules and Firebase Auth.
 
 ---
 
@@ -26,7 +26,7 @@ Current fitness applications suffer from:
 
 ### 🏋️ The "Smart" Logger
 
-- **Reactive UI:** A tRPC-powered logging system that saves data per-set (debounced) to prevent data loss.
+- **Reactive UI:** Logging system that saves data per-set (debounced) to prevent data loss, directly to Firestore.
 - **Rest Timer:** Automatic countdowns between sets with haptic feedback/notifications.
 - **Exercise Library:** A searchable database of 200+ movements with video demonstrations.
 
@@ -45,13 +45,12 @@ Current fitness applications suffer from:
 
 ## 4. Technical Architecture
 
-| Layer         | Technology         | Reason                                                 |
-| :------------ | :----------------- | :----------------------------------------------------- |
-| **Frontend**  | React (Next.js)    | SEO for public exercise pages + fast hydration.        |
-| **API Layer** | **tRPC**           | End-to-end typesafety for complex workout schemas.     |
-| **Database**  | Firestore + Prisma | Relational data is vital for tracking Set/Rep history. |
-| **Auth**      | NextAuth.js        | Secure integration with Google/Apple/Passkeys.         |
-| **State**     | TanStack Query     | Superior caching for "offline-first" logging.          |
+| Layer        | Technology     | Reason                                          |
+| :----------- | :------------- | :---------------------------------------------- |
+| **Frontend** | React (Vite)   | SPA, fast HMR, all logic in frontend.           |
+| **Database** | Firestore      | Serverless, scalable, real-time NoSQL database. |
+| **Auth**     | Firebase Auth  | Secure integration with Google/Apple/Email.     |
+| **State**    | TanStack Query | Superior caching for "offline-first" logging.   |
 
 ---
 
@@ -68,7 +67,7 @@ Current fitness applications suffer from:
 
 - **Retention:** Target **40%** Week-4 retention.
 - **Consistency:** Average of **3.2** workouts logged per user/week.
-- **Sync Speed:** API response time for logging a set under **100ms**.
+- **Sync Speed:** Data write to Firestore under **100ms**.
 
 ---
 
