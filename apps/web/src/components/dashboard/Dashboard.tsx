@@ -3,6 +3,7 @@ import { GreetingHeader } from './GreetingHeader'
 import { GoalCard } from './GoalCard'
 import { ProgressSection } from './ProgressSection'
 import { StatsSection } from './StatsSection'
+import { RecommendedSection } from './RecommendedSection'
 
 export function Dashboard() {
   return (
@@ -11,6 +12,7 @@ export function Dashboard() {
       <GoalCard />
       <ProgressSection />
       <StatsSection />
+      <RecommendedSection />
     </div>
   )
 }
