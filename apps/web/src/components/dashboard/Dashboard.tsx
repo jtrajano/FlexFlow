@@ -2,6 +2,7 @@ import React from 'react'
 import { GreetingHeader } from './GreetingHeader'
 import { GoalCard } from './GoalCard'
 import { ProgressSection } from './ProgressSection'
+import { StatsSection } from './StatsSection'
 
 export function Dashboard() {
   return (
@@ -9,6 +10,7 @@ export function Dashboard() {
       <GreetingHeader />
       <GoalCard />
       <ProgressSection />
+      <StatsSection />
     </div>
   )
 }
