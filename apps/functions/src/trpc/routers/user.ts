@@ -7,22 +7,50 @@ export const userRouter = router({
     .input(CreateUserSchema)
     .output(UserSchema)
     .mutation(({ input }) => ({
-      id: 'dummy-id',
+      uid: 'dummy-id',
       email: input.email,
-      name: input.name,
+      displayName: input.displayName,
+      photoURL: null,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      preferredUnits: 'kg' as const,
+      trainingGoal: 'General' as const,
     })),
 
   getById: publicProcedure
     .input(z.string())
     .output(UserSchema)
     .query(({ input }) => ({
-      id: input,
+      uid: input,
       email: 'test@example.com',
-      name: 'Test User',
+      displayName: 'Test User',
+      photoURL: null,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      preferredUnits: 'kg' as const,
+      trainingGoal: 'General' as const,
     })),
 
   list: publicProcedure.output(z.array(UserSchema)).query(() => [
-    { id: 'user-1', email: 'user1@example.com', name: 'User One' },
-    { id: 'user-2', email: 'user2@example.com', name: 'User Two' },
+    {
+      uid: 'user-1',
+      email: 'user1@example.com',
+      displayName: 'User One',
+      photoURL: null,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      preferredUnits: 'kg' as const,
+      trainingGoal: 'General' as const,
+    },
+    {
+      uid: 'user-2',
+      email: 'user2@example.com',
+      displayName: 'User Two',
+      photoURL: null,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      preferredUnits: 'kg' as const,
+      trainingGoal: 'General' as const,
+    },
   ]),
 })

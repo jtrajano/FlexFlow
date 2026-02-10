@@ -35,8 +35,8 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 > **So that** I have a typesafe development environment to build features upon.
 
 - **Acceptance Criteria:**
-  - [ ] `pnpm build` passes for all workspaces.
-  - [ ] ESLint and Prettier are configured.
+  - [x] `pnpm build` passes for all workspaces.
+  - [x] ESLint and Prettier are configured.
 
 #### **US-1.2: User Authentication**
 
@@ -45,9 +45,9 @@ The project is divided into **Epics** (High-level themes) and **User Stories** (
 > **So that** my workout data is securely saved and accessible across devices.
 
 - **Acceptance Criteria:**
-  - [ ] User can log in via OAuth or Email provider.
-  - [ ] Session persists on page refresh.
-  - [ ] User record is created in Firestore `users` collection.
+  - [x] User can log in via OAuth or Email provider.
+  - [x] Session persists on page refresh.
+  - [x] User record is created in Firestore `users` collection.
 
 #### **US-1.3: Firestore Security Rules**
 

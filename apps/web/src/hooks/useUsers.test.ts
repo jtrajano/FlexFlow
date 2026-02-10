@@ -1,44 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import { useUsers, useUser, useCreateUser } from './useUsers'
+import { getDocs, getDoc, setDoc } from 'firebase/firestore'
 
-// Mock the trpc client
-vi.mock('../lib/trpc', () => ({
-  trpc: {
-    user: {
-      list: {
-        useQuery: vi.fn(() => ({
-          data: [
-            { id: 'user-1', email: 'user1@example.com', name: 'User One' },
-            { id: 'user-2', email: 'user2@example.com', name: 'User Two' },
-          ],
-          isLoading: false,
-          error: null,
-        })),
-      },
-      getById: {
-        useQuery: vi.fn(() => ({
-          data: { id: 'user-1', email: 'user1@example.com', name: 'User One' },
-          isLoading: false,
-          error: null,
-        })),
-      },
-      create: {
-        useMutation: vi.fn(() => ({
-          mutate: vi.fn(),
-          mutateAsync: vi.fn().mockResolvedValue({
-            id: 'new-user',
-            email: 'new@example.com',
-            name: 'New User',
-          }),
-          isLoading: false,
-          error: null,
-        })),
-      },
-    },
-  },
+// Mock firebase lib
+vi.mock('../lib/firebase', () => ({
+  db: { type: 'firestore' },
+}))
+
+// Mock firebase/firestore
+vi.mock('firebase/firestore', () => ({
+  collection: vi.fn(),
+  doc: vi.fn(),
+  getDocs: vi.fn(),
+  getDoc: vi.fn(),
+  setDoc: vi.fn(),
 }))
 
 const createWrapper = () => {
@@ -52,38 +30,57 @@ const createWrapper = () => {
 }
 
 describe('useUsers', () => {
-  it('returns user list data', () => {
-    const { result } = renderHook(() => useUsers(), {
-      wrapper: createWrapper(),
-    })
-    expect(result.current.data).toBeDefined()
-    expect(result.current.data?.length).toBe(2)
-  })
+  it('returns user list data', async () => {
+    const mockUsers = [
+      { uid: 'user-1', email: 'user1@example.com', displayName: 'User One' },
+      { uid: 'user-2', email: 'user2@example.com', displayName: 'User Two' },
+    ]
+    vi.mocked(getDocs).mockResolvedValue({
+      docs: mockUsers.map(user => ({
+        data: () => user,
+      })),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
 
-  it('returns loading state', () => {
     const { result } = renderHook(() => useUsers(), {
       wrapper: createWrapper(),
     })
-    expect(result.current.isLoading).toBeDefined()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toEqual(mockUsers)
   })
 })
 
 describe('useUser', () => {
-  it('returns single user by id', () => {
+  it('returns single user by uid', async () => {
+    const mockUser = { uid: 'user-1', email: 'user1@example.com', displayName: 'User One' }
+    vi.mocked(getDoc).mockResolvedValue({
+      exists: () => true,
+      data: () => mockUser,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
     const { result } = renderHook(() => useUser('user-1'), {
       wrapper: createWrapper(),
     })
-    expect(result.current.data).toBeDefined()
-    expect(result.current.data?.id).toBe('user-1')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toEqual(mockUser)
   })
 })
 
 describe('useCreateUser', () => {
-  it('returns mutation function', () => {
+  it('returns mutation function and calls setDoc', async () => {
+    const newUser = { uid: 'new-user', email: 'new@example.com', displayName: 'New User' }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(setDoc).mockResolvedValue(undefined as any)
+
     const { result } = renderHook(() => useCreateUser(), {
       wrapper: createWrapper(),
     })
-    expect(result.current.mutateAsync).toBeDefined()
-    expect(typeof result.current.mutateAsync).toBe('function')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await result.current.mutateAsync(newUser as any)
+    expect(setDoc).toHaveBeenCalled()
   })
 })

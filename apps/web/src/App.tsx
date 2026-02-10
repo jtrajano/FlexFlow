@@ -62,6 +62,11 @@ import {
   CardFooter,
 } from '@repo/ui/Card'
 
+import { useAuth } from './hooks/useAuth'
+import { LoginView } from './components/auth/LoginView'
+import { auth } from './lib/firebase'
+import { signOut } from 'firebase/auth'
+
 // Assets
 import viteLogo from '/vite.svg'
 import reactLogo from '/react.svg'
@@ -73,8 +78,23 @@ import reactLogo from '/react.svg'
  * in the browser starts here!
  */
 export function App() {
+  const { user, loading } = useAuth()
   // React State - like a scoreboard that updates the display automatically
   const [count, setCount] = useState(0)
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginView />
+  }
+
+  const handleLogout = () => signOut(auth)
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -84,6 +104,14 @@ export function App() {
         Any app in the monorepo can use this same Header!
       */}
       <Header title="The Hytel Way" />
+      <div className="max-w-4xl mx-auto flex justify-end px-4 mb-4">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">{user.email}</span>
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      </div>
 
       {/* Logo Section */}
       <div className="flex justify-center gap-8 my-8">
