@@ -46,12 +46,18 @@
  * =============================================================================
  */
 
-// import { useState } from 'react'
+import { useState } from 'react'
 import './style.css'
+
+import { doc, setDoc, updateDoc, collection } from 'firebase/firestore'
+import { db } from './lib/firebase'
+import { OnboardingData, calculateTargets } from '@repo/shared'
 
 import { useAuth } from './hooks/useAuth'
 import { LoginView } from './components/auth/LoginView'
 import { Dashboard } from './components/dashboard/Dashboard'
+import { Onboarding } from './components/onboarding/Onboarding'
+import { OnboardingSuccessView } from './components/onboarding/OnboardingSuccessView'
 
 /**
  * Main App Component
@@ -60,7 +66,9 @@ import { Dashboard } from './components/dashboard/Dashboard'
  * in the browser starts here!
  */
 export function App() {
-  const { user, loading } = useAuth()
+  const { user, userData, loading } = useAuth()
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [onboardedName, setOnboardedName] = useState('')
 
   if (loading) {
     return (
@@ -68,6 +76,74 @@ export function App() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
+  }
+  const handleOnboardingComplete = async (data: OnboardingData) => {
+    if (!user) return
+
+    try {
+      // 1. Update User document
+      const userRef = doc(db, 'users', user.uid)
+      const currentDate = new Date().toISOString()
+      await updateDoc(userRef, {
+        onBoardingCompleted: true,
+        displayName: data.name,
+      })
+
+      // Calculate automated fitness targets
+      const targets = calculateTargets(data)
+
+      // 2. Create UserProfile
+      const profileRef = doc(db, 'userProfiles', user.uid)
+      await setDoc(profileRef, {
+        userId: user.uid,
+        name: data.name,
+        gender: data.gender,
+        height: parseFloat(data.height) || null,
+        birthdate: data.birthdate,
+        createdAt: currentDate,
+        updatedAt: currentDate,
+      })
+
+      // 3. Create initial BodyMetrics entry
+      const metricsRef = doc(collection(db, 'bodyMetrics'))
+      await setDoc(metricsRef, {
+        uid: metricsRef.id,
+        userId: user.uid,
+        weight: parseFloat(data.weight) || 0,
+        bodyFatPercent: null,
+        recordedAt: currentDate,
+      })
+
+      // 4. Create UserGoals
+      const goalsRef = doc(collection(db, 'userGoals'))
+      await setDoc(goalsRef, {
+        uid: goalsRef.id,
+        userId: user.uid,
+        goalType: data.fitnessGoal,
+        activityLevel: data.activityLevel,
+        workoutPreferences: data.workoutPreferences.join(','),
+        weeklyCalorieBurnTarget: targets.weeklyCalorieBurnTarget,
+        weeklyWorkoutMinutes: targets.weeklyWorkoutMinutes,
+        weeklyWorkoutFrequencyTarget: targets.weeklyWorkoutFrequencyTarget,
+        dailyMoveTarget: targets.dailyMoveTarget,
+        dailyExerciseTarget: targets.dailyExerciseTarget,
+        createdAt: currentDate,
+      })
+
+      setOnboardedName(data.name)
+      setShowSuccess(true)
+    } catch (error) {
+      console.error('Error completing onboarding:', error)
+      alert('Failed to save your profile. Please try again.')
+    }
+  }
+
+  if (showSuccess) {
+    return <OnboardingSuccessView name={onboardedName} onDone={() => window.location.reload()} />
+  }
+
+  if (userData && !userData.onBoardingCompleted) {
+    return <Onboarding onComplete={handleOnboardingComplete} />
   }
 
   if (!user) {

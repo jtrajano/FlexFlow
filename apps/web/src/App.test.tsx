@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { App } from './App'
 import { useAuth } from './hooks/useAuth'
 import { User as FirebaseUser } from 'firebase/auth'
@@ -7,6 +7,10 @@ import { User as FirebaseUser } from 'firebase/auth'
 // Mock useAuth hook
 vi.mock('./hooks/useAuth', () => ({
   useAuth: vi.fn(),
+}))
+
+vi.mock('./hooks/useUserGoals', () => ({
+  useUserGoals: vi.fn(() => ({ data: null, isLoading: false })),
 }))
 
 // Mock firebase signOut
@@ -19,10 +23,20 @@ vi.mock('firebase/auth', () => ({
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Default to authenticated state
+    // Default to authenticated and onboarded state
     vi.mocked(useAuth).mockReturnValue({
       user: { email: 'test@example.com' } as unknown as FirebaseUser,
-      userData: null,
+      userData: {
+        uid: '123',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: null,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+        onBoardingCompleted: true,
+        preferredUnits: 'kg',
+        trainingGoal: 'General',
+      },
       loading: false,
       error: null,
     })
@@ -51,18 +65,10 @@ describe('App', () => {
     expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument()
   })
 
-  it('renders the dashboard when authenticated', () => {
+  it('renders the dashboard when authenticated and onboarded', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The Hytel Way')
-    expect(screen.getByText('test@example.com')).toBeInTheDocument()
+    // GreetingHeader displays the first name or 'Athlete'
+    expect(screen.getByText(/Athlete/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
-  })
-
-  it('renders the counter and works correctly', () => {
-    render(<App />)
-    expect(screen.getByText('0')).toBeInTheDocument()
-    const increaseButton = screen.getByRole('button', { name: /increment counter/i })
-    fireEvent.click(increaseButton)
-    expect(screen.getByText('1')).toBeInTheDocument()
   })
 })
