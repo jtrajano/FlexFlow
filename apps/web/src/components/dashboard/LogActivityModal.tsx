@@ -29,6 +29,11 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
 
   const [selectedType, setSelectedType] = useState<string>('cardio')
   const [duration, setDuration] = useState<number>(30)
+  const [logDate, setLogDate] = useState<string>(() => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+    return now.toISOString().slice(0, 16)
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleLogActivity = async () => {
@@ -39,16 +44,20 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
       const weight = metrics?.weight || 70
       const caloriesBurned = calculateActivityCalories(selectedType, duration, weight)
 
+      const selectedDate = new Date(logDate)
+
       await addDoc(collection(db, 'activityLogs'), {
         userId: user.uid,
         type: selectedType,
         durationMinutes: duration,
         caloriesBurned: caloriesBurned,
-        timestamp: new Date().toISOString(),
+        timestamp: selectedDate.toISOString(),
+        date: selectedDate.toLocaleDateString('en-CA'), // YYYY-MM-DD (local)
       })
 
       // Invalidate queries to refresh dashboard
       queryClient.invalidateQueries({ queryKey: ['activityLogs', 'today', user.uid] })
+      queryClient.invalidateQueries({ queryKey: ['activityLogs', 'weekly', user.uid] })
       onClose()
     } catch (error) {
       console.error('Error logging activity:', error)
@@ -122,6 +131,19 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
                       {duration}m
                     </span>
                   </div>
+                </div>
+
+                {/* Date Picker */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-3 block">
+                    Date & Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={logDate}
+                    onChange={e => setLogDate(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#a3e635] transition-colors [color-scheme:dark]"
+                  />
                 </div>
 
                 {/* Estimated Calories */}

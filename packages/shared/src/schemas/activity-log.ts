@@ -21,6 +21,7 @@ export const ActivityLogSchema = z.object({
   durationMinutes: z.number().min(1),
   caloriesBurned: z.number().min(0),
   timestamp: z.string(), // ISO string
+  date: z.string(), // YYYY-MM-DD
   notes: z.string().optional(),
 })
 

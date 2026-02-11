@@ -9,20 +9,26 @@ export function useTodayActivity(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) return []
 
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const tomorrow = new Date(today)
-      tomorrow.setDate(tomorrow.getDate() + 1)
+      const todayStr = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD in local time
 
-      const q = query(
-        collection(db, 'activityLogs'),
-        where('userId', '==', userId),
-        where('timestamp', '>=', today.toISOString()),
-        where('timestamp', '<', tomorrow.toISOString())
-      )
+      const q = query(collection(db, 'activityLogs'), where('userId', '==', userId))
 
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => doc.data() as ActivityLog)
+      const allActivities = querySnapshot.docs.map(
+        doc =>
+          ({
+            uid: doc.id,
+            ...doc.data(),
+          }) as ActivityLog
+      )
+
+      // Filter for today's logs in local time
+      return allActivities.filter(act => {
+        // Handle both ISO string timestamps and the new 'date' field
+        const logDate =
+          act.date || (act.timestamp ? new Date(act.timestamp).toLocaleDateString('en-CA') : null)
+        return logDate === todayStr
+      })
     },
     enabled: !!userId,
   })
