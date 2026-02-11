@@ -1,7 +1,27 @@
 import React from 'react'
 import { CircularProgress } from './CircularProgress'
+import { useAuth } from '../../hooks/useAuth'
+import { useUserGoals } from '../../hooks/useUserGoals'
 
 export function ProgressSection() {
+  const { user } = useAuth()
+  const { data: goals, isLoading } = useUserGoals(user?.uid)
+
+  // Use pre-computed Daily Targets from Firestore
+  // Default values until goals are loaded or if they don't exist
+  const dailyMoveTarget = goals?.dailyMoveTarget || 500
+  const dailyExerciseTarget = goals?.dailyExerciseTarget || 30
+  const dailyStandTarget = 12 // Default Apple Health standard
+
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-white mb-4">Today's Progress</h3>
+        <div className="bg-gray-900 rounded-2xl p-6 border border-border/50 animate-pulse h-48"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="mb-8">
       <h3 className="text-lg font-semibold text-white mb-4">Today's Progress</h3>
@@ -9,21 +29,24 @@ export function ProgressSection() {
       <div className="bg-gray-900 rounded-2xl p-6 border border-border/50">
         <div className="grid grid-cols-3 gap-4">
           <CircularProgress
-            value={75}
-            max={100}
+            value={320} // Placeholder current value
+            max={dailyMoveTarget}
             label="Move"
+            unit="kcal"
             color="#a3e635" // lime-400
           />
           <CircularProgress
-            value={60}
-            max={100}
+            value={18} // Placeholder current value
+            max={dailyExerciseTarget}
             label="Exercise"
+            unit="min"
             color="#f97316" // orange-500
           />
           <CircularProgress
-            value={90}
-            max={100}
+            value={8} // Placeholder current value
+            max={dailyStandTarget}
             label="Stand"
+            unit="hrs"
             color="#38bdf8" // sky-400
           />
         </div>

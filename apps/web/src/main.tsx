@@ -2,12 +2,15 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import { AuthProvider } from './providers/AuthProvider'
+import { QueryProvider } from './providers/QueryProvider'
 import './style.css'
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <QueryProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </QueryProvider>
   </StrictMode>
 )

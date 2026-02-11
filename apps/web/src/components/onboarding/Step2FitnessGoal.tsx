@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { OnboardingData } from './Onboarding'
+import { OnboardingData } from '@repo/shared'
 
 interface Step2FitnessGoalProps {
   data: OnboardingData
@@ -10,7 +10,7 @@ interface Step2FitnessGoalProps {
 
 const goals = [
   {
-    id: 'lose_weight',
+    id: 'LoseWeight',
     title: 'Lose Weight',
     description: 'Burn fat and get leaner',
     icon: (
@@ -27,7 +27,7 @@ const goals = [
     ),
   },
   {
-    id: 'build_muscle',
+    id: 'BuildMuscle',
     title: 'Build Muscle',
     description: 'Gain strength and size',
     icon: (
@@ -44,7 +44,7 @@ const goals = [
     ),
   },
   {
-    id: 'stay_fit',
+    id: 'StayFit',
     title: 'Stay Fit',
     description: 'Maintain current fitness',
     icon: (
@@ -61,7 +61,7 @@ const goals = [
     ),
   },
   {
-    id: 'improve_endurance',
+    id: 'ImproveEndurance',
     title: 'Improve Endurance',
     description: 'Boost stamina and cardio',
     icon: (

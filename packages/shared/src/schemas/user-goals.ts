@@ -10,6 +10,8 @@ export const UserGoalsSchema = z.object({
   weeklyCalorieBurnTarget: z.number().min(0).default(0),
   weeklyWorkoutMinutes: z.number().min(0).default(0),
   weeklyWorkoutFrequencyTarget: z.number().min(0).default(1),
+  dailyMoveTarget: z.number().min(0).default(0),
+  dailyExerciseTarget: z.number().min(0).default(0),
   activityLevel: z.string(),
   workoutPreferences: z.string().default(''),
   createdAt: z.string(),

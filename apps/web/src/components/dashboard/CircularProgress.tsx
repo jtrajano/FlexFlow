@@ -4,6 +4,7 @@ interface CircularProgressProps {
   value: number
   max: number
   label: string
+  unit?: string
   color: string
   size?: number
   strokeWidth?: number
@@ -13,6 +14,7 @@ export function CircularProgress({
   value,
   max,
   label,
+  unit,
   color,
   size = 120,
   strokeWidth = 8,
@@ -56,8 +58,11 @@ export function CircularProgress({
           />
         </svg>
         {/* Value Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xl font-bold text-white">{Math.round(progress * 100)}%</span>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-white leading-none">{value}</span>
+          {unit && (
+            <span className="text-[10px] text-muted-foreground uppercase mt-0.5">{unit}</span>
+          )}
         </div>
       </div>
       <span className="mt-2 text-sm text-muted-foreground font-medium">{label}</span>

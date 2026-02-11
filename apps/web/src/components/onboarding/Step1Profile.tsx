@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { OnboardingData } from './Onboarding'
+import { OnboardingData } from '@repo/shared'
 
 interface Step1ProfileProps {
   data: OnboardingData

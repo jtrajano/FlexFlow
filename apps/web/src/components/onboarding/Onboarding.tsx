@@ -6,20 +6,7 @@ import { Step2FitnessGoal } from './Step2FitnessGoal'
 import { Step3ActivityLevel } from './Step3ActivityLevel'
 import { Step4WorkoutPreferences } from './Step4WorkoutPreferences'
 
-export interface OnboardingData {
-  // Step 1
-  name: string
-  birthdate: string
-  gender: string
-  weight: string
-  height: string
-  // Step 2
-  fitnessGoal: string
-  // Step 3
-  activityLevel: string
-  // Step 4
-  workoutPreferences: string[]
-}
+import { OnboardingData } from '@repo/shared'
 
 interface OnboardingProps {
   onComplete: (data: OnboardingData) => void
