@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   photoURL: z.string().nullable(),
   createdAt: z.string(),
   lastLoginAt: z.string(),
+  onBoardingCompleted: z.boolean().default(false),
   preferredUnits: z.enum(['kg', 'lbs']).default('kg'),
   trainingGoal: z.enum(['Strength', 'Hypertrophy', 'General']).default('General'),
 })

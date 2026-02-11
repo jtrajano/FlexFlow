@@ -10,6 +10,7 @@ describe('UserSchema', () => {
       photoURL: 'https://example.com/photo.jpg',
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
+      onBoardingCompleted: false,
       preferredUnits: 'kg',
       trainingGoal: 'Strength',
     })

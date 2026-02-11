@@ -46,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               photoURL: firebaseUser.photoURL,
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString(),
+              onBoardingCompleted: false,
               preferredUnits: 'kg',
               trainingGoal: 'General',
             }
