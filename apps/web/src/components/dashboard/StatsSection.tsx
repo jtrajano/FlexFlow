@@ -1,4 +1,5 @@
-import React from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { useTodayActivity } from '../../hooks/useTodayActivity'
 
 // Reusable Stat Card Component
 function StatCard({
@@ -7,8 +8,8 @@ function StatCard({
   value,
   unit,
   change,
-  iconColor = 'text-green-500',
-  iconBg = 'bg-green-500/10',
+  iconColor = 'text-[#a3e635]',
+  iconBg = 'bg-[#a3e635]/10',
 }: {
   icon: React.ReactNode
   label: string
@@ -23,7 +24,7 @@ function StatCard({
       <div className="flex justify-between items-start mb-2">
         <div className={`p-2 rounded-xl ${iconBg} ${iconColor}`}>{icon}</div>
         {change && (
-          <span className="text-green-400 text-xs font-bold bg-green-900/20 px-2 py-1 rounded-full">
+          <span className="text-[#a3e635] text-xs font-bold bg-[#a3e635]/10 px-2 py-1 rounded-full">
             {change}
           </span>
         )}
@@ -41,6 +42,34 @@ function StatCard({
 }
 
 export function StatsSection() {
+  const { user } = useAuth()
+  const { data: activities, isLoading } = useTodayActivity(user?.uid)
+
+  const totalCalories = activities?.reduce((sum, act) => sum + act.caloriesBurned, 0) || 0
+  const totalMinutes = activities?.reduce((sum, act) => sum + act.durationMinutes, 0) || 0
+
+  const formatActiveTime = (mins: number) => {
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return h > 0 ? `${h}h ${m}` : `${m}`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-white mb-4">Your Stats</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div
+              key={i}
+              className="bg-gray-900 rounded-2xl h-32 border border-border/50 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mb-8">
       <h3 className="text-lg font-semibold text-white mb-4">Your Stats</h3>
@@ -49,9 +78,8 @@ export function StatsSection() {
         {/* Calories */}
         <StatCard
           label="Calories"
-          value="847"
+          value={totalCalories.toLocaleString()}
           unit="kcal"
-          change="+12%"
           icon={
             <svg
               width="20"
@@ -73,7 +101,8 @@ export function StatsSection() {
           label="Steps"
           value="8,432"
           unit="steps"
-          change="+8%"
+          iconColor="text-blue-400"
+          iconBg="bg-blue-400/10"
           icon={
             <svg
               width="20"
@@ -95,9 +124,10 @@ export function StatsSection() {
         {/* Active Time */}
         <StatCard
           label="Active Time"
-          value="1h 24"
+          value={formatActiveTime(totalMinutes)}
           unit="min"
-          change="+5%"
+          iconColor="text-orange-400"
+          iconBg="bg-orange-400/10"
           icon={
             <svg
               width="20"
@@ -120,6 +150,8 @@ export function StatsSection() {
           label="Avg Heart Rate"
           value="72"
           unit="bpm"
+          iconColor="text-red-400"
+          iconBg="bg-red-400/10"
           icon={
             <svg
               width="20"

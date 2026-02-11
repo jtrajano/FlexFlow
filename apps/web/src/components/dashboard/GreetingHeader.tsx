@@ -27,7 +27,7 @@ export function GreetingHeader() {
 
       <div className="flex items-center gap-3">
         <button
-          className="p-2 rounded-full bg-muted/20 hover:bg-muted/30 transition-colors relative"
+          className="p-2.5 rounded-full bg-muted/20 hover:bg-muted/30 transition-colors relative group"
           aria-label="Notifications"
         >
           <svg

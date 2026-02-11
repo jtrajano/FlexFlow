@@ -77,6 +77,11 @@ export function App() {
       </div>
     )
   }
+
+  if (!user) {
+    return <LoginView />
+  }
+
   const handleOnboardingComplete = async (data: OnboardingData) => {
     if (!user) return
 
@@ -144,10 +149,6 @@ export function App() {
 
   if (userData && !userData.onBoardingCompleted) {
     return <Onboarding onComplete={handleOnboardingComplete} />
-  }
-
-  if (!user) {
-    return <LoginView />
   }
 
   return (

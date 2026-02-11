@@ -9,3 +9,6 @@ export type { UserGoals, GoalType } from './user-goals'
 
 export { BodyMetricsSchema } from './body-metrics'
 export type { BodyMetrics } from './body-metrics'
+
+export { ActivityLogSchema, ActivityTypeEnum } from './activity-log'
+export type { ActivityLog, ActivityType } from './activity-log'

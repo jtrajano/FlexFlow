@@ -77,3 +77,32 @@ export function calculateTargets(data: OnboardingData): FitnessTargets {
     dailyExerciseTarget,
   }
 }
+
+/**
+ * MET (Metabolic Equivalent of Task) values for common activities
+ */
+export const MET_VALUES: Record<string, number> = {
+  strength: 6.0,
+  cardio: 8.0,
+  yoga: 3.0,
+  hiit: 11.0,
+  pilates: 3.5,
+  sports: 7.0,
+  crossfit: 10.0,
+  swimming: 8.0,
+  walking: 3.5,
+}
+
+/**
+ * Calculates calories burned for an activity based on MET, weight, and duration.
+ * Formula: Calories = MET * weight (kg) * duration (hours)
+ */
+export function calculateActivityCalories(
+  type: string,
+  durationMinutes: number,
+  weightKg: number
+): number {
+  const met = MET_VALUES[type] || 3.5 // Fallback to walking MET
+  const durationHours = durationMinutes / 60
+  return Math.round(met * weightKg * durationHours)
+}

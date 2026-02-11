@@ -1,7 +1,11 @@
 import React from 'react'
 import { Button } from '@repo/ui/Button'
 
-export function GoalCard() {
+interface GoalCardProps {
+  onStartClick?: () => void
+}
+
+export function GoalCard({ onStartClick }: GoalCardProps) {
   return (
     <div className="relative rounded-2xl overflow-hidden mb-8 h-48 group">
       {/* Background Image/Gradient */}
@@ -18,7 +22,10 @@ export function GoalCard() {
         <h2 className="text-3xl font-bold text-white mb-1">Push your limits</h2>
         <p className="text-muted-foreground text-sm mb-6">3 workouts remaining</p>
 
-        <Button className="w-fit bg-green-500 text-primary-foreground hover:bg-green-500/90 rounded-full px-6 font-bold">
+        <Button
+          onClick={onStartClick}
+          className="w-fit bg-green-500 text-primary-foreground hover:bg-green-500/90 rounded-full px-6 font-bold"
+        >
           Start Workout
         </Button>
       </div>

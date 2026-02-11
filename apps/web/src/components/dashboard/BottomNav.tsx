@@ -21,7 +21,11 @@ function NavItem({ icon, label, isActive = false, onClick }: NavItemProps) {
   )
 }
 
-export function BottomNav() {
+interface BottomNavProps {
+  onAddClick?: () => void
+}
+
+export function BottomNav({ onAddClick }: BottomNavProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
       <div className="max-w-2xl mx-auto px-4 pb-4">
@@ -75,6 +79,7 @@ export function BottomNav() {
 
             {/* Center Add Button */}
             <button
+              onClick={onAddClick}
               className="flex items-center 
             justify-center w-12 h-12 -mt-7 rounded-full bg-green-500 text-primary-foreground shadow-lg hover:bg-green-500/90 transition-all hover:scale-110"
             >
