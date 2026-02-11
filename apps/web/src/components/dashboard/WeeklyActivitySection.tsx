@@ -30,8 +30,8 @@ export function WeeklyActivitySection() {
   const weekData = [
     { day: 'Mon', height: 45, isActive: false },
     { day: 'Tue', height: 60, isActive: false },
-    { day: 'Wed', height: 35, isActive: false },
-    { day: 'Thu', height: 80, isActive: true },
+    { day: 'Wed', height: 35, isActive: true },
+    { day: 'Thu', height: 80, isActive: false },
     { day: 'Fri', height: 50, isActive: false },
     { day: 'Sat', height: 70, isActive: false },
     { day: 'Sun', height: 40, isActive: false },

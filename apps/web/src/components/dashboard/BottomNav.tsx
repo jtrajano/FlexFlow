@@ -74,7 +74,10 @@ export function BottomNav() {
             />
 
             {/* Center Add Button */}
-            <button className="flex items-center justify-center w-12 h-12 -mt-7 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-110">
+            <button
+              className="flex items-center 
+            justify-center w-12 h-12 -mt-7 rounded-full bg-green-500 text-primary-foreground shadow-lg hover:bg-green-500/90 transition-all hover:scale-110"
+            >
               <svg
                 width="24"
                 height="24"

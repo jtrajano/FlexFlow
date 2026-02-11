@@ -18,7 +18,7 @@ export function GoalCard() {
         <h2 className="text-3xl font-bold text-white mb-1">Push your limits</h2>
         <p className="text-muted-foreground text-sm mb-6">3 workouts remaining</p>
 
-        <Button className="w-fit bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 font-bold">
+        <Button className="w-fit bg-green-500 text-primary-foreground hover:bg-green-500/90 rounded-full px-6 font-bold">
           Start Workout
         </Button>
       </div>
