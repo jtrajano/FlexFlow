@@ -501,13 +501,12 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
                     )
                   )
                   const height = maxCalories > 0 ? (dayCalories / maxCalories) * 100 : 0
-                  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
                   return (
                     <ChartBar
                       key={index}
-                      height={Math.max(height, 10)}
-                      label={dayLabels[index]}
+                      height={dayCalories > 0 ? Math.max(height, 10) : 0}
+                      label={day.dayName}
                       value={dayCalories}
                     />
                   )
