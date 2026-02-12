@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useTodayActivity } from '../../hooks/useTodayActivity'
 import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Mock all hooks
 vi.mock('../../hooks/useAuth')
@@ -16,6 +17,35 @@ vi.mock('../../hooks/useUserGoals', () => ({
   useUserGoals: vi.fn(() => ({ data: null, isLoading: false })),
 }))
 
+// Mock Firebase
+vi.mock('../../lib/firebase', () => ({
+  db: {},
+}))
+
+const createMockDocSnap = (data: any) => ({
+  data: () => data,
+  exists: () => !!data,
+})
+
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(),
+  getDoc: vi.fn(() =>
+    Promise.resolve(
+      createMockDocSnap({
+        userId: 'test-user-123',
+        name: 'Test User',
+        gender: 'male',
+        height: 180,
+        birthdate: '1990-01-01',
+        profileVisibility: 'Private',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    )
+  ),
+  setDoc: vi.fn(() => Promise.resolve()),
+}))
+
 // Mock Framer Motion
 vi.mock('framer-motion', () => ({
   motion: {
@@ -23,6 +53,7 @@ vi.mock('framer-motion', () => ({
     button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
     circle: ({ ...props }: any) => <circle {...props} />,
   },
+  AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
 
 const mockUser = {
@@ -39,6 +70,18 @@ const mockActivity = {
   caloriesBurned: 300,
   date: new Date().toISOString(),
   timestamp: new Date().toISOString(),
+}
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 }
 
 describe('Dashboard with StatisticsPage Integration', () => {
@@ -85,56 +128,56 @@ describe('Dashboard with StatisticsPage Integration', () => {
 
   describe('Dashboard Rendering', () => {
     it('should render the Dashboard component', () => {
-      render(<Dashboard />)
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      render(<Dashboard />, { wrapper: createWrapper() })
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
 
     it('should render navigation controls', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
     it('should initialize with home view active', () => {
-      render(<Dashboard />)
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      render(<Dashboard />, { wrapper: createWrapper() })
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
   })
 
   describe('StatisticsPage Integration', () => {
     it('should support rendering StatisticsPage when stats tab is active', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // Dashboard provides the context for StatisticsPage to render
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
     it('should pass authentication context to StatisticsPage', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // useAuth is called by Dashboard and available to StatisticsPage
       expect(vi.mocked(useAuth)).toHaveBeenCalled()
     })
 
     it('should pass activity data to StatisticsPage', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // Hooks are called and data is available
       expect(vi.mocked(useTodayActivity)).toHaveBeenCalled()
       expect(vi.mocked(useWeeklyActivity)).toHaveBeenCalled()
     })
 
     it('should pass body metrics to StatisticsPage', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(vi.mocked(useLatestBodyMetrics)).toHaveBeenCalled()
     })
   })
 
   describe('Dashboard State Management', () => {
     it('should maintain state across tab switches', () => {
-      const { rerender } = render(<Dashboard />)
+      const { rerender } = render(<Dashboard />, { wrapper: createWrapper() })
       rerender(<Dashboard />)
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
 
     it('should have navigation enabled for tab switching', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       const nav = screen.getByRole('navigation')
       const buttons = nav.querySelectorAll('button')
       expect(buttons.length).toBeGreaterThan(0)
@@ -143,20 +186,20 @@ describe('Dashboard with StatisticsPage Integration', () => {
 
   describe('StatisticsPage Back Navigation', () => {
     it('should support back navigation from StatisticsPage to home', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // Dashboard provides onBack callback to StatisticsPage
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
     it('should reset to home view when back is called', () => {
-      render(<Dashboard />)
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      render(<Dashboard />, { wrapper: createWrapper() })
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
   })
 
   describe('Data Flow from Dashboard to StatisticsPage', () => {
     it('should have all required hooks for StatisticsPage', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
 
       // All four hooks are initialized
       expect(vi.mocked(useAuth)).toHaveBeenCalled()
@@ -166,12 +209,12 @@ describe('Dashboard with StatisticsPage Integration', () => {
     })
 
     it('should pass user context correctly', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(vi.mocked(useAuth)).toHaveBeenCalled()
     })
 
     it('should provide activity data for charts and metrics', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(vi.mocked(useTodayActivity)).toHaveBeenCalled()
       expect(vi.mocked(useWeeklyActivity)).toHaveBeenCalled()
     })
@@ -186,7 +229,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
         error: new Error('Auth failed'),
       } as any)
 
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
@@ -197,7 +240,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
         error: new Error('Activity error'),
       } as any)
 
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
@@ -208,7 +251,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
         error: null,
       } as any)
 
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
   })
@@ -221,7 +264,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
         error: null,
       } as any)
 
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
 
@@ -232,14 +275,14 @@ describe('Dashboard with StatisticsPage Integration', () => {
         error: null,
       } as any)
 
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       expect(screen.getByRole('navigation')).toBeInTheDocument()
     })
   })
 
   describe('StatisticsPage Full Flow from Dashboard', () => {
     it('should render fully initialized StatisticsPage when stats tab is active', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // All dependencies are set up correctly
       expect(vi.mocked(useAuth)).toHaveBeenCalled()
       expect(vi.mocked(useTodayActivity)).toHaveBeenCalled()
@@ -248,7 +291,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
     })
 
     it('should maintain hook data consistency in StatisticsPage', () => {
-      const { rerender } = render(<Dashboard />)
+      const { rerender } = render(<Dashboard />, { wrapper: createWrapper() })
       rerender(<Dashboard />)
 
       // Same data should be available after rerender
@@ -256,7 +299,7 @@ describe('Dashboard with StatisticsPage Integration', () => {
     })
 
     it('should update StatisticsPage when data changes', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
 
       // Update mock data
       vi.mocked(useTodayActivity).mockReturnValue({
@@ -281,20 +324,20 @@ describe('Dashboard with StatisticsPage Integration', () => {
     })
 
     it('should provide callback prop for StatisticsPage back button', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       // onBack callback is provided by Dashboard's renderContent function
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
   })
 
   describe('Navigation and Routing', () => {
     it('should render home as the default view', () => {
-      render(<Dashboard />)
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      render(<Dashboard />, { wrapper: createWrapper() })
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
     })
 
     it('should have navigation available for switching to statistics', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
       const nav = screen.getByRole('navigation')
       expect(nav.querySelectorAll('button').length).toBeGreaterThan(0)
     })
@@ -302,10 +345,10 @@ describe('Dashboard with StatisticsPage Integration', () => {
 
   describe('Complete User Journey: Dashboard to StatisticsPage', () => {
     it('should support the complete flow from dashboard to statistics and back', () => {
-      render(<Dashboard />)
+      render(<Dashboard />, { wrapper: createWrapper() })
 
       // Start at dashboard
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(screen.getByText("Today's Progress")).toBeInTheDocument()
 
       // Navigation should be available
       expect(screen.getByRole('navigation')).toBeInTheDocument()
