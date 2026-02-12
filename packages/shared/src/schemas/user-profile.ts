@@ -6,6 +6,7 @@ export const UserProfileSchema = z.object({
   gender: z.string().nullable(),
   height: z.number().nullable(),
   birthdate: z.string().nullable(),
+  profileVisibility: z.enum(['Private', 'Friends Only', 'Public']).default('Private'),
   createdAt: z.string(),
   updatedAt: z.string(),
 })

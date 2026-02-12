@@ -63,7 +63,7 @@ export function StatsView({ onBack }: { onBack: () => void }) {
       exit={{ opacity: 0, y: -20 }}
       className="space-y-8 pb-24"
     >
-      <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md py-4 -mx-4 px-4 flex items-center justify-between border-b border-white/5">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tighter">Your Stats</h1>
           <p className="text-gray-400 text-sm">Comprehensive performance metrics</p>

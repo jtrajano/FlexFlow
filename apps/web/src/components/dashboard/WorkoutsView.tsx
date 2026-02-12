@@ -115,9 +115,26 @@ export function WorkoutsView({ onBack }: { onBack: () => void }) {
 
   return (
     <motion.div className="max-w-4xl mx-auto pb-24 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">My Weekly Plan</h1>
-        <p className="text-gray-400 text-sm">Customize your training schedule</p>
+      <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md py-4 -mx-4 px-4 flex items-center justify-between border-b border-white/5">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tighter">My Weekly Plan</h1>
+          <p className="text-gray-400 text-sm">Customize your training schedule</p>
+        </div>
+        <button
+          onClick={onBack}
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-3 relative">

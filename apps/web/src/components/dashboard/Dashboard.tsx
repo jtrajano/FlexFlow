@@ -10,6 +10,7 @@ import { LogActivityModal } from './LogActivityModal'
 import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
 import { StatisticsPage } from './StatisticsPage'
+import { ProfileView } from './ProfileView'
 
 export function Dashboard() {
   const [showLogModal, setShowLogModal] = useState(false)
@@ -23,7 +24,9 @@ export function Dashboard() {
         return <LogActivityView onBack={() => setActiveTab('home')} />
       case 'stats':
         return <StatisticsPage onBack={() => setActiveTab('home')} />
-      // Add other cases later ('profile')
+      case 'profile':
+        return <ProfileView onBack={() => setActiveTab('home')} />
+      // Add other cases later
       default:
         return (
           <>
@@ -42,13 +45,16 @@ export function Dashboard() {
     <>
       <div className="max-w-4xl mx-auto px-4 py-6 min-h-screen pb-28">{renderContent()}</div>
 
-      {activeTab !== 'workouts' && activeTab !== 'log-activity' && (
-        <BottomNav
-          onAddClick={() => setActiveTab('log-activity')}
-          activeTab={activeTab}
-          onNavigate={setActiveTab}
-        />
-      )}
+      {activeTab !== 'workouts' &&
+        activeTab !== 'log-activity' &&
+        activeTab !== 'stats' &&
+        activeTab !== 'profile' && (
+          <BottomNav
+            onAddClick={() => setActiveTab('log-activity')}
+            activeTab={activeTab}
+            onNavigate={setActiveTab}
+          />
+        )}
       <LogActivityModal isOpen={showLogModal} onClose={() => setShowLogModal(false)} />
     </>
   )
