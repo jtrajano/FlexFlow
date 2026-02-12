@@ -26,6 +26,7 @@ export const ActivityLogSchema = z.object({
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   notes: z.string().optional(),
+  difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
 })
 
 export type ActivityLog = z.infer<typeof ActivityLogSchema>
