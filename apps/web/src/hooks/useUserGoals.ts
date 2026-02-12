@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore'
+import { collection, query, where, getDocs, limit } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { UserGoals } from '@repo/shared'
 
@@ -9,12 +9,7 @@ export function useUserGoals(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) return null
 
-      const q = query(
-        collection(db, 'userGoals'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(1)
-      )
+      const q = query(collection(db, 'userGoals'), where('userId', '==', userId), limit(1))
 
       const querySnapshot = await getDocs(q)
       if (querySnapshot.empty) return null

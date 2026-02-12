@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore'
+﻿import { useQuery } from '@tanstack/react-query'
+import { collection, query, where, getDocs, limit } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { WorkoutSchedule } from '@repo/shared'
 
@@ -12,7 +12,6 @@ export function useUserSchedule(userId: string | undefined) {
       const q = query(
         collection(db, 'userWorkoutSchedules'),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
         limit(1)
       )
 

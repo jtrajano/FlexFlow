@@ -23,9 +23,11 @@ function NavItem({ icon, label, isActive = false, onClick }: NavItemProps) {
 
 interface BottomNavProps {
   onAddClick?: () => void
+  activeTab: string
+  onNavigate: (tab: string) => void
 }
 
-export function BottomNav({ onAddClick }: BottomNavProps) {
+export function BottomNav({ onAddClick, activeTab, onNavigate }: BottomNavProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
       <div className="max-w-2xl mx-auto px-4 pb-4">
@@ -33,8 +35,9 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
           <div className="flex items-center justify-around px-2 py-3 relative">
             {/* Home */}
             <NavItem
-              isActive={true}
+              isActive={activeTab === 'home'}
               label="Home"
+              onClick={() => onNavigate('home')}
               icon={
                 <svg
                   width="20"
@@ -54,7 +57,9 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
 
             {/* Workouts */}
             <NavItem
+              isActive={activeTab === 'workouts'}
               label="Workouts"
+              onClick={() => onNavigate('workouts')}
               icon={
                 <svg
                   width="20"
@@ -100,7 +105,9 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
 
             {/* Stats */}
             <NavItem
+              isActive={activeTab === 'stats'}
               label="Stats"
+              onClick={() => onNavigate('stats')}
               icon={
                 <svg
                   width="20"
@@ -121,7 +128,9 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
 
             {/* Profile */}
             <NavItem
+              isActive={activeTab === 'profile'}
               label="Profile"
+              onClick={() => onNavigate('profile')}
               icon={
                 <svg
                   width="20"
