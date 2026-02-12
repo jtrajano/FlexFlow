@@ -259,7 +259,7 @@ export function Step4WorkoutPreferences({ data, onNext, onBack }: Step4WorkoutPr
           }`}
           whileTap={selected.length > 0 ? { scale: 0.98 } : {}}
         >
-          Complete
+          Generate Recommendation
           <svg
             width="20"
             height="20"
@@ -268,7 +268,7 @@ export function Step4WorkoutPreferences({ data, onNext, onBack }: Step4WorkoutPr
             stroke="currentColor"
             strokeWidth="2.5"
           >
-            <polyline points="20 6 9 17 4 12" />
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </motion.button>
       </div>

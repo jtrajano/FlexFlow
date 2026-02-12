@@ -1,11 +1,18 @@
 import { OnboardingData } from '../types/onboarding'
 
+export interface WorkoutTypeDistribution {
+  workoutType: string
+  weeklyMinutes: number
+  weeklySessions: number
+}
+
 export interface FitnessTargets {
   weeklyCalorieBurnTarget: number
   weeklyWorkoutMinutes: number
   weeklyWorkoutFrequencyTarget: number
   dailyMoveTarget: number
   dailyExerciseTarget: number
+  workoutTypeDistribution: WorkoutTypeDistribution[]
 }
 
 /**
@@ -69,12 +76,68 @@ export function calculateTargets(data: OnboardingData): FitnessTargets {
   const dailyMoveTarget = Math.round(dailyCalorieGoal)
   const dailyExerciseTarget = Math.round(weeklyWorkoutMinutes / 7)
 
+  // 5. Workout Type Distribution
+  const workoutTypeDistribution: WorkoutTypeDistribution[] = []
+  const prefs =
+    data.workoutPreferences && data.workoutPreferences.length > 0
+      ? data.workoutPreferences
+      : ['strength', 'cardio']
+
+  // Weighting mapping for different fitness goals
+  const weights: Record<string, Record<string, number>> = {
+    BuildMuscle: { strength: 4, hiit: 1, cardio: 1, crossfit: 3 },
+    LoseWeight: { cardio: 4, hiit: 4, strength: 2, swimming: 3 },
+    StayFit: { strength: 2, cardio: 2, yoga: 2, walking: 3 },
+    ImproveEndurance: { cardio: 5, swimming: 4, hiit: 2, walking: 2 },
+  }
+
+  const goalWeights = weights[data.fitnessGoal] || { strength: 1, cardio: 1 }
+
+  // Calculate total weight of selected preferences
+  let totalPreferenceWeight = 0
+  prefs.forEach(pref => {
+    totalPreferenceWeight += goalWeights[pref] || 1
+  })
+
+  let remainingSessions = weeklyWorkoutFrequencyTarget
+  let remainingMinutes = weeklyWorkoutMinutes
+
+  prefs.forEach((pref, index) => {
+    let sessions: number
+    let minutes: number
+
+    // For the last preference, use all remaining sessions/minutes to avoid rounding issues
+    if (index === prefs.length - 1) {
+      sessions = remainingSessions
+      minutes = remainingMinutes
+    } else {
+      const weight = goalWeights[pref] || 1
+      sessions = Math.round((weight / totalPreferenceWeight) * weeklyWorkoutFrequencyTarget)
+      sessions = Math.min(sessions, remainingSessions)
+
+      minutes = Math.round((weight / totalPreferenceWeight) * weeklyWorkoutMinutes)
+      minutes = Math.min(minutes, remainingMinutes)
+
+      remainingSessions -= sessions
+      remainingMinutes -= minutes
+    }
+
+    if (sessions > 0) {
+      workoutTypeDistribution.push({
+        workoutType: pref,
+        weeklyMinutes: minutes,
+        weeklySessions: sessions,
+      })
+    }
+  })
+
   return {
     weeklyCalorieBurnTarget,
     weeklyWorkoutMinutes,
     weeklyWorkoutFrequencyTarget,
     dailyMoveTarget,
     dailyExerciseTarget,
+    workoutTypeDistribution,
   }
 }
 

@@ -7,13 +7,15 @@ import { Step1Profile } from './Step1Profile'
 import { Step2FitnessGoal } from './Step2FitnessGoal'
 import { Step3ActivityLevel } from './Step3ActivityLevel'
 import { Step4WorkoutPreferences } from './Step4WorkoutPreferences'
-import { OnboardingData } from '@repo/shared'
+import { RecommendationView } from './RecommendationView'
+import { OnboardingData, FitnessTargets, calculateTargets } from '@repo/shared'
 
 interface OnboardingProps {
-  onComplete: (data: OnboardingData) => void
+  onComplete: (data: OnboardingData, targets?: FitnessTargets, hasChanges?: boolean) => void
+  onSaveGoals: (data: OnboardingData, targets: FitnessTargets) => Promise<void>
 }
 
-export function Onboarding({ onComplete }: OnboardingProps) {
+export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
   const { user } = useAuth()
   const [currentStep, setCurrentStep] = useState(1)
   const [data, setData] = useState<OnboardingData>({
@@ -27,7 +29,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     workoutPreferences: [],
   })
 
-  const totalSteps = 4
+  const totalSteps = 5
   const progress = (currentStep / totalSteps) * 100
 
   const handleSignOut = async () => {
@@ -44,10 +46,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     setData(updatedData)
 
     if (currentStep < totalSteps) {
+      // If we are moving from Step 4 (Preferences) to Step 5 (Recommendation),
+      // save the automated computation record.
+      if (currentStep === 4) {
+        const targets = calculateTargets(updatedData)
+        onSaveGoals(updatedData, targets).catch(err =>
+          console.error('Error saving initial goals:', err)
+        )
+      }
       setCurrentStep(currentStep + 1)
-    } else {
-      onComplete(updatedData)
     }
+  }
+
+  const handleRecommendationComplete = (targets: FitnessTargets, hasChanges: boolean) => {
+    onComplete(data, targets, hasChanges)
   }
 
   const handleBack = () => {
@@ -103,6 +115,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 key="step4"
                 data={data}
                 onNext={handleNext}
+                onBack={handleBack}
+              />
+            )}
+            {currentStep === 5 && (
+              <RecommendationView
+                key="step5"
+                data={data}
+                onComplete={handleRecommendationComplete}
                 onBack={handleBack}
               />
             )}

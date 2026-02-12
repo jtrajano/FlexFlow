@@ -41,10 +41,17 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
     setIsSubmitting(true)
 
     try {
+      const selectedDate = new Date(logDate)
+      const now = new Date()
+
+      if (selectedDate > now) {
+        alert('Cannot log activities in the future.')
+        setIsSubmitting(false)
+        return
+      }
+
       const weight = metrics?.weight || 70
       const caloriesBurned = calculateActivityCalories(selectedType, duration, weight)
-
-      const selectedDate = new Date(logDate)
 
       await addDoc(collection(db, 'activityLogs'), {
         userId: user.uid,
@@ -141,6 +148,9 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
                   <input
                     type="datetime-local"
                     value={logDate}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+                      .toISOString()
+                      .slice(0, 16)}
                     onChange={e => setLogDate(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#a3e635] transition-colors [color-scheme:dark]"
                   />

@@ -31,6 +31,23 @@ describe('UserGoalsSchema', () => {
       expect(result.data.weeklyCalorieBurnTarget).toBe(0)
       expect(result.data.weeklyWorkoutMinutes).toBe(0)
       expect(result.data.workoutPreferences).toBe('')
+      expect(result.data.workoutTypeDistribution).toEqual([])
+    }
+  })
+
+  it('validates correct workout distribution data', () => {
+    const result = UserGoalsSchema.safeParse({
+      uid: 'goal123',
+      userId: 'user123',
+      goalType: 'StayFit',
+      activityLevel: 'Active',
+      workoutTypeDistribution: [{ workoutType: 'weights', weeklyMinutes: 100, weeklySessions: 2 }],
+      createdAt: new Date().toISOString(),
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.workoutTypeDistribution).toHaveLength(1)
+      expect(result.data.workoutTypeDistribution[0].workoutType).toBe('weights')
     }
   })
 

@@ -51,7 +51,7 @@ import './style.css'
 
 import { doc, setDoc, updateDoc, collection } from 'firebase/firestore'
 import { db } from './lib/firebase'
-import { OnboardingData, calculateTargets } from '@repo/shared'
+import { OnboardingData, calculateTargets, FitnessTargets } from '@repo/shared'
 
 import { useAuth } from './hooks/useAuth'
 import { LoginView } from './components/auth/LoginView'
@@ -82,7 +82,31 @@ export function App() {
     return <LoginView />
   }
 
-  const handleOnboardingComplete = async (data: OnboardingData) => {
+  const saveGoals = async (data: OnboardingData, targets: FitnessTargets) => {
+    if (!user) return
+    const currentDate = new Date().toISOString()
+    const goalsRef = doc(collection(db, 'userGoals'))
+    await setDoc(goalsRef, {
+      uid: goalsRef.id,
+      userId: user.uid,
+      goalType: data.fitnessGoal,
+      activityLevel: data.activityLevel,
+      workoutPreferences: data.workoutPreferences.join(','),
+      weeklyCalorieBurnTarget: targets.weeklyCalorieBurnTarget,
+      weeklyWorkoutMinutes: targets.weeklyWorkoutMinutes,
+      weeklyWorkoutFrequencyTarget: targets.weeklyWorkoutFrequencyTarget,
+      dailyMoveTarget: targets.dailyMoveTarget,
+      dailyExerciseTarget: targets.dailyExerciseTarget,
+      workoutTypeDistribution: targets.workoutTypeDistribution,
+      createdAt: currentDate,
+    })
+  }
+
+  const handleOnboardingComplete = async (
+    data: OnboardingData,
+    customTargets?: FitnessTargets,
+    hasChanges?: boolean
+  ) => {
     if (!user) return
 
     try {
@@ -94,8 +118,8 @@ export function App() {
         displayName: data.name,
       })
 
-      // Calculate automated fitness targets
-      const targets = calculateTargets(data)
+      // Use custom targets from recommendation page or calculate automated ones
+      const targets = customTargets || calculateTargets(data)
 
       // 2. Create UserProfile
       const profileRef = doc(db, 'userProfiles', user.uid)
@@ -119,21 +143,11 @@ export function App() {
         recordedAt: currentDate,
       })
 
-      // 4. Create UserGoals
-      const goalsRef = doc(collection(db, 'userGoals'))
-      await setDoc(goalsRef, {
-        uid: goalsRef.id,
-        userId: user.uid,
-        goalType: data.fitnessGoal,
-        activityLevel: data.activityLevel,
-        workoutPreferences: data.workoutPreferences.join(','),
-        weeklyCalorieBurnTarget: targets.weeklyCalorieBurnTarget,
-        weeklyWorkoutMinutes: targets.weeklyWorkoutMinutes,
-        weeklyWorkoutFrequencyTarget: targets.weeklyWorkoutFrequencyTarget,
-        dailyMoveTarget: targets.dailyMoveTarget,
-        dailyExerciseTarget: targets.dailyExerciseTarget,
-        createdAt: currentDate,
-      })
+      // 4. Create UserGoals record only if they were modified at the recommendation step.
+      // A base record was already saved during the transition to the recommendation view.
+      if (hasChanges) {
+        await saveGoals(data, targets)
+      }
 
       setOnboardedName(data.name)
       setShowSuccess(true)
@@ -148,7 +162,7 @@ export function App() {
   }
 
   if (userData && !userData.onBoardingCompleted) {
-    return <Onboarding onComplete={handleOnboardingComplete} />
+    return <Onboarding onComplete={handleOnboardingComplete} onSaveGoals={saveGoals} />
   }
 
   return (
