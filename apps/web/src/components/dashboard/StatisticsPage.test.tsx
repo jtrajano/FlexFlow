@@ -444,7 +444,7 @@ describe('StatisticsPage', () => {
 
       const insightsSection = screen.getByText('✨ Performance Insights').closest('section')
       // Should contain at least one insight
-      expect(insightsSection?.textContent.length).toBeGreaterThan(0)
+      expect(insightsSection?.textContent?.length).toBeGreaterThan(0)
     })
 
     it('should show most active day insight', () => {
