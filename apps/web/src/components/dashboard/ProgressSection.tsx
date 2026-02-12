@@ -9,9 +9,29 @@ export function ProgressSection() {
   const { data: goals, isLoading: goalsLoading } = useUserGoals(user?.uid)
   const { data: activities, isLoading: activitiesLoading } = useTodayActivity(user?.uid)
 
-  // Calculate Daily Totals from activity logs
+  // Calculate Daily Totals
   const totalCalories = activities?.reduce((sum, act) => sum + act.caloriesBurned, 0) || 0
   const totalMinutes = activities?.reduce((sum, act) => sum + act.durationMinutes, 0) || 0
+
+  // Calculate Stand Hours (hours with activity)
+  const activeHours = new Set<number>()
+  activities?.forEach(act => {
+    if (!act.timestamp) return
+    const start = new Date(act.timestamp)
+    const end = new Date(start.getTime() + act.durationMinutes * 60000)
+
+    // Mark start hour
+    activeHours.add(start.getHours())
+
+    // If activity spans across hours, add those too
+    const current = new Date(start)
+    current.setHours(current.getHours() + 1, 0, 0, 0)
+    while (current < end) {
+      activeHours.add(current.getHours())
+      current.setHours(current.getHours() + 1)
+    }
+  })
+  const standProgress = activeHours.size
 
   // Use pre-computed Daily Targets from Firestore
   // Default values until goals are loaded or if they don't exist
@@ -49,7 +69,7 @@ export function ProgressSection() {
             color="#f97316" // orange-500
           />
           <CircularProgress
-            value={8} // Placeholder current value
+            value={standProgress}
             max={dailyStandTarget}
             label="Stand"
             unit="hrs"
