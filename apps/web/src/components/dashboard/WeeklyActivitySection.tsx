@@ -13,14 +13,12 @@ function DayBar({ day, height, isActive = false }: DayBarProps) {
     <div className="flex flex-col items-center gap-2 flex-1 group">
       <div className="w-full h-32 flex items-end justify-center">
         <div
-          className={`w-8 rounded-t-lg transition-all ${
-            isActive ? 'bg-primary' : 'bg-muted/20 group-hover:bg-muted/30'
-          }`}
+          className="w-8 rounded-t-lg transition-all bg-[#a3e635]/80 group-hover:bg-[#a3e635]"
           style={{ height: `${Math.max(5, height)}%` }}
         />
       </div>
       <span
-        className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+        className={`text-xs font-medium ${isActive ? 'text-[#a3e635]' : 'text-muted-foreground'}`}
       >
         {day}
       </span>
@@ -49,7 +47,7 @@ export function WeeklyActivitySection() {
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-white">Weekly Activity</h3>
-        <button className="text-primary text-sm font-medium px-3 py-1 rounded-md bg-primary/10 hover:bg-primary/20 transition-colors">
+        <button className="text-[#a3e635] text-sm font-medium px-3 py-1 rounded-md bg-[#a3e635]/10 hover:bg-[#a3e635]/20 transition-colors">
           Last 7 Days
         </button>
       </div>

@@ -8,6 +8,7 @@ import { WeeklyActivitySection } from './WeeklyActivitySection'
 import { BottomNav } from './BottomNav'
 import { LogActivityModal } from './LogActivityModal'
 import { WorkoutsView } from './WorkoutsView'
+import { LogActivityView } from './LogActivityView'
 
 export function Dashboard() {
   const [showLogModal, setShowLogModal] = useState(false)
@@ -17,12 +18,14 @@ export function Dashboard() {
     switch (activeTab) {
       case 'workouts':
         return <WorkoutsView onBack={() => setActiveTab('home')} />
+      case 'log-activity':
+        return <LogActivityView onBack={() => setActiveTab('home')} />
       // Add other cases later ('stats', 'profile')
       default:
         return (
           <>
             <GreetingHeader />
-            <GoalCard onStartClick={() => setShowLogModal(true)} />
+            <GoalCard onStartClick={() => setActiveTab('log-activity')} />
             <ProgressSection />
             <StatsSection />
             <RecommendedSection />
@@ -36,9 +39,9 @@ export function Dashboard() {
     <>
       <div className="max-w-4xl mx-auto px-4 py-6 min-h-screen pb-28">{renderContent()}</div>
 
-      {activeTab !== 'workouts' && (
+      {activeTab !== 'workouts' && activeTab !== 'log-activity' && (
         <BottomNav
-          onAddClick={() => setShowLogModal(true)}
+          onAddClick={() => setActiveTab('log-activity')}
           activeTab={activeTab}
           onNavigate={setActiveTab}
         />
