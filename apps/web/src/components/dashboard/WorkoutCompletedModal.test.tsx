@@ -11,8 +11,8 @@ vi.mock('../../lib/firebase', () => ({
 }))
 
 vi.mock('firebase/firestore', () => ({
-  doc: (...args: any[]) => mockDoc(...args),
-  updateDoc: (...args: any[]) => mockUpdateDoc(...args),
+  doc: mockDoc,
+  updateDoc: mockUpdateDoc,
 }))
 
 vi.mock('framer-motion', () => ({
