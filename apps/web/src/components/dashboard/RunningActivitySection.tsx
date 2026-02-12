@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { doc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { useQueryClient } from '@tanstack/react-query'
 import { calculateActivityCalories, ActivityLog } from '@repo/shared'
 import { useAuth } from '../../hooks/useAuth'
@@ -40,6 +40,7 @@ export function RunningActivitySection({
   const queryClient = useQueryClient()
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [isStopping, setIsStopping] = useState(false)
+  const [isDiscarding, setIsDiscarding] = useState(false)
   const [completedActivity, setCompletedActivity] = useState<ActivityLog | null>(null)
   const [showCompletedModal, setShowCompletedModal] = useState(false)
 
@@ -97,6 +98,27 @@ export function RunningActivitySection({
     }
   }
 
+  const handleDiscard = async () => {
+    if (!user || !runningActivity?.uid) return
+    const shouldDiscard = window.confirm('Discard this in-progress activity?')
+    if (!shouldDiscard) return
+
+    setIsDiscarding(true)
+    try {
+      await deleteDoc(doc(db, 'activityLogs', runningActivity.uid))
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['activityLogs', 'today', user.uid] }),
+        queryClient.invalidateQueries({ queryKey: ['activityLogs', 'weekly', user.uid] }),
+        queryClient.invalidateQueries({ queryKey: ['activityLogs', 'running', user.uid] }),
+      ])
+    } catch (error) {
+      console.error('Error discarding activity:', error)
+      alert('Failed to discard activity')
+    } finally {
+      setIsDiscarding(false)
+    }
+  }
+
   // Don't unmount if we're showing the completed modal
   if (isLoading || (!runningActivity && !showCompletedModal)) return null
 
@@ -130,10 +152,17 @@ export function RunningActivitySection({
           </p>
           <h3 className="mt-1 text-lg font-black text-white capitalize">{runningActivity.type}</h3>
           <p className="mt-1 font-mono text-2xl font-black text-white">{elapsed}</p>
-          <div className="mt-3 flex justify-end">
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              onClick={handleDiscard}
+              disabled={isStopping || isDiscarding}
+              className="rounded-lg bg-white/10 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-white/20 disabled:opacity-60"
+            >
+              {isDiscarding ? 'Discarding...' : 'Discard'}
+            </button>
             <button
               onClick={handleStop}
-              disabled={isStopping}
+              disabled={isStopping || isDiscarding}
               className="rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-red-400 disabled:opacity-60"
             >
               {isStopping ? 'Stopping...' : 'Stop'}
@@ -175,13 +204,22 @@ export function RunningActivitySection({
             <p className="mt-2 font-mono text-2xl font-black text-white">{elapsed}</p>
           </div>
 
-          <button
-            onClick={handleStop}
-            disabled={isStopping}
-            className="rounded-xl bg-red-500 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-400 disabled:opacity-60"
-          >
-            {isStopping ? 'Stopping...' : 'Stop'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDiscard}
+              disabled={isStopping || isDiscarding}
+              className="rounded-xl bg-white/10 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/20 disabled:opacity-60"
+            >
+              {isDiscarding ? 'Discarding...' : 'Discard'}
+            </button>
+            <button
+              onClick={handleStop}
+              disabled={isStopping || isDiscarding}
+              className="rounded-xl bg-red-500 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-400 disabled:opacity-60"
+            >
+              {isStopping ? 'Stopping...' : 'Stop'}
+            </button>
+          </div>
         </div>
       </div>
 
