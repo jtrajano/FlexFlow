@@ -11,8 +11,12 @@ import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
 import { StatisticsPage } from './StatisticsPage'
 import { ProfileView } from './ProfileView'
+import { useAuth } from '../../hooks/useAuth'
+import { useRunningActivity } from '../../hooks/useRunningActivity'
 
 export function Dashboard() {
+  const { user } = useAuth()
+  const { data: runningActivity } = useRunningActivity(user?.uid)
   const [showLogModal, setShowLogModal] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
 
@@ -53,6 +57,7 @@ export function Dashboard() {
             onAddClick={() => setActiveTab('log-activity')}
             activeTab={activeTab}
             onNavigate={setActiveTab}
+            isAddDisabled={!!runningActivity}
           />
         )}
       <LogActivityModal isOpen={showLogModal} onClose={() => setShowLogModal(false)} />

@@ -25,9 +25,15 @@ interface BottomNavProps {
   onAddClick?: () => void
   activeTab: string
   onNavigate: (tab: string) => void
+  isAddDisabled?: boolean
 }
 
-export function BottomNav({ onAddClick, activeTab, onNavigate }: BottomNavProps) {
+export function BottomNav({
+  onAddClick,
+  activeTab,
+  onNavigate,
+  isAddDisabled = false,
+}: BottomNavProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
       <div className="max-w-2xl mx-auto px-4 pb-4">
@@ -84,9 +90,13 @@ export function BottomNav({ onAddClick, activeTab, onNavigate }: BottomNavProps)
 
             {/* Center Add Button */}
             <button
-              onClick={onAddClick}
-              className="flex items-center 
-            justify-center w-12 h-12 -mt-7 rounded-full bg-green-500 text-primary-foreground shadow-lg hover:bg-green-500/90 transition-all hover:scale-110"
+              onClick={isAddDisabled ? undefined : onAddClick}
+              disabled={isAddDisabled}
+              className={`flex items-center justify-center w-12 h-12 -mt-7 rounded-full text-primary-foreground shadow-lg transition-all ${
+                isAddDisabled
+                  ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-green-500 hover:bg-green-500/90 hover:scale-110'
+              }`}
             >
               <svg
                 width="24"

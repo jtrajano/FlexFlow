@@ -40,12 +40,34 @@ export function ManualActivityModal({ isOpen, onClose, selectedType }: ManualAct
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
     return now.toISOString().slice(0, 16)
   })
+  const [durationMinutes, setDurationMinutes] = useState(30)
 
   useEffect(() => {
     if (isOpen) {
       setManualType(selectedType)
     }
   }, [isOpen, selectedType])
+
+  // Sync duration when start or end time changes
+  useEffect(() => {
+    const start = new Date(startDateTime)
+    const end = new Date(endDateTime)
+    if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end > start) {
+      const calculatedMinutes = Math.round((end.getTime() - start.getTime()) / 60000)
+      setDurationMinutes(calculatedMinutes)
+    }
+  }, [startDateTime, endDateTime])
+
+  // Update start time when duration is manually changed
+  const handleDurationChange = (minutes: number) => {
+    setDurationMinutes(minutes)
+    const end = new Date(endDateTime)
+    if (!Number.isNaN(end.getTime()) && minutes > 0) {
+      const newStart = new Date(end.getTime() - minutes * 60000)
+      newStart.setMinutes(newStart.getMinutes() - newStart.getTimezoneOffset())
+      setStartDateTime(newStart.toISOString().slice(0, 16))
+    }
+  }
 
   const handleLogPastActivity = async () => {
     if (!user) return
@@ -191,6 +213,19 @@ export function ManualActivityModal({ isOpen, onClose, selectedType }: ManualAct
                     .slice(0, 16)}
                   onChange={e => setEndDateTime(e.target.value)}
                   className="mt-2 w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#a3e635]/50 transition-all [color-scheme:dark]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Duration (Minutes)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={durationMinutes}
+                  onChange={e => handleDurationChange(parseInt(e.target.value) || 1)}
+                  className="mt-2 w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#a3e635]/50 transition-all"
                 />
               </div>
             </div>
