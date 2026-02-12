@@ -4,6 +4,7 @@ import { useTodayActivity } from '../../hooks/useTodayActivity'
 import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
 import { estimateSteps } from '@repo/shared'
+import { isCompletedActivity } from '../../utils/activity-log'
 
 interface StatCardProps {
   label: string
@@ -40,12 +41,15 @@ export function StatsView({ onBack }: { onBack: () => void }) {
   const { data: activities } = useTodayActivity(user?.uid)
   const { data: weeklyData } = useWeeklyActivity(user?.uid)
   const { data: metrics } = useLatestBodyMetrics(user?.uid)
+  const completedActivities = activities?.filter(isCompletedActivity) || []
 
-  const totalCalories = activities?.reduce((sum, act) => sum + act.caloriesBurned, 0) || 0
-  const totalMinutes = activities?.reduce((sum, act) => sum + act.durationMinutes, 0) || 0
+  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
 
-  const activitySteps =
-    activities?.reduce((sum, act) => sum + estimateSteps(act.type, act.durationMinutes), 0) || 0
+  const activitySteps = completedActivities.reduce(
+    (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
+    0
+  )
   const baseSteps = 2500
   const totalSteps = baseSteps + activitySteps
 
@@ -168,7 +172,7 @@ export function StatsView({ onBack }: { onBack: () => void }) {
         />
         <StatCard
           label="Workouts"
-          value={activities?.length || 0}
+          value={completedActivities.length}
           unit="sessions"
           color="bg-pink-400"
           icon={

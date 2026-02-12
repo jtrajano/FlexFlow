@@ -5,6 +5,7 @@ import { useTodayActivity } from '../../hooks/useTodayActivity'
 import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
 import { estimateSteps } from '@repo/shared'
+import { isCompletedActivity } from '../../utils/activity-log'
 
 interface StatCardProps {
   label: string
@@ -215,11 +216,16 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
   const { data: activities = [] } = useTodayActivity(user?.uid)
   const { data: weeklyData = [] } = useWeeklyActivity(user?.uid)
   const { data: metrics } = useLatestBodyMetrics(user?.uid)
+  const completedActivities = activities.filter(isCompletedActivity)
+  const completedWeeklyData = weeklyData.map(day => ({
+    ...day,
+    activities: day.activities.filter(isCompletedActivity),
+  }))
 
   // Calculate today's stats
-  const totalCalories = activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-  const totalMinutes = activities.reduce((sum, act) => sum + act.durationMinutes, 0)
-  const activitySteps = activities.reduce(
+  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
+  const activitySteps = completedActivities.reduce(
     (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
     0
   )
@@ -228,19 +234,19 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
 
   // Calculate weekly stats
   const weeklyStats = useMemo(() => {
-    const weeklyCalories = weeklyData.reduce(
+    const weeklyCalories = completedWeeklyData.reduce(
       (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.caloriesBurned, 0),
       0
     )
     const avgDailyCalories =
-      weeklyData.length > 0 ? Math.round(weeklyCalories / weeklyData.length) : 0
-    const weeklyMinutes = weeklyData.reduce(
+      completedWeeklyData.length > 0 ? Math.round(weeklyCalories / completedWeeklyData.length) : 0
+    const weeklyMinutes = completedWeeklyData.reduce(
       (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.durationMinutes, 0),
       0
     )
-    const weeklyWorkouts = weeklyData.reduce((sum, day) => sum + day.activities.length, 0)
-    const activeDays = weeklyData.filter(day => day.activities.length > 0).length
-    const currentStreak = weeklyData.filter(day => day.activities.length > 0).length
+    const weeklyWorkouts = completedWeeklyData.reduce((sum, day) => sum + day.activities.length, 0)
+    const activeDays = completedWeeklyData.filter(day => day.activities.length > 0).length
+    const currentStreak = completedWeeklyData.filter(day => day.activities.length > 0).length
 
     return {
       weeklyCalories,
@@ -250,11 +256,11 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
       activeDays,
       currentStreak,
     }
-  }, [weeklyData])
+  }, [completedWeeklyData])
 
   // Calculate personal records
   const personalRecords = useMemo(() => {
-    const allActivities = weeklyData.flatMap(day => day.activities)
+    const allActivities = completedWeeklyData.flatMap(day => day.activities)
 
     const longestWorkout = allActivities.reduce(
       (max, act) => (act.durationMinutes > max ? act.durationMinutes : max),
@@ -272,7 +278,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
       mostSessionsInWeek,
       bestStreak: weeklyStats.currentStreak,
     }
-  }, [weeklyData, weeklyStats])
+  }, [completedWeeklyData, weeklyStats])
 
   // Calculate goal adherence
   // Calculate goal adherence with defaults
@@ -484,13 +490,13 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
           <div className="bg-gray-900/50 border border-white/5 rounded-2xl p-6">
             <div className="grid grid-cols-7 gap-2">
               {weeklyData.length > 0 ? (
-                weeklyData.map((day, index) => {
+                completedWeeklyData.map((day, index) => {
                   const dayCalories = day.activities.reduce(
                     (sum, act) => sum + act.caloriesBurned,
                     0
                   )
                   const maxCalories = Math.max(
-                    ...weeklyData.map(d =>
+                    ...completedWeeklyData.map(d =>
                       d.activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
                     )
                   )
@@ -541,7 +547,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
         {/* Section 4: Workout Distribution */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold text-white">💪 Workout Distribution</h2>
-          <WorkoutDistributionChart activities={activities} />
+          <WorkoutDistributionChart activities={completedActivities} />
         </section>
 
         {/* Section 5: Personal Records */}
@@ -632,7 +638,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
         {/* Section 6: Performance Insights */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold text-white">✨ Performance Insights</h2>
-          <PerformanceInsights weeklyData={weeklyData} activities={activities} />
+          <PerformanceInsights weeklyData={completedWeeklyData} activities={completedActivities} />
         </section>
 
         {/* Today's Focus - Bottom Section */}
@@ -685,7 +691,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
 
             <StatCard
               label="Workouts"
-              value={activities.length}
+              value={completedActivities.length}
               unit="sessions"
               color="bg-pink-400"
               icon={

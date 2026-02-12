@@ -1,6 +1,7 @@
 import { useAuth } from '../../hooks/useAuth'
 import { useTodayActivity } from '../../hooks/useTodayActivity'
 import { estimateSteps } from '@repo/shared'
+import { isCompletedActivity } from '../../utils/activity-log'
 
 // Reusable Stat Card Component
 function StatCard({
@@ -45,14 +46,17 @@ function StatCard({
 export function StatsSection() {
   const { user } = useAuth()
   const { data: activities, isLoading } = useTodayActivity(user?.uid)
+  const completedActivities = activities?.filter(isCompletedActivity) || []
 
-  const totalCalories = activities?.reduce((sum, act) => sum + act.caloriesBurned, 0) || 0
-  const totalMinutes = activities?.reduce((sum, act) => sum + act.durationMinutes, 0) || 0
+  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
 
   // Calculate estimated steps from logged activities
   // Add a base count for non-exercise daily movement (e.g. ~2000-3000 steps)
-  const activitySteps =
-    activities?.reduce((sum, act) => sum + estimateSteps(act.type, act.durationMinutes), 0) || 0
+  const activitySteps = completedActivities.reduce(
+    (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
+    0
+  )
   const baseSteps = 2500 // Assumed baseline daily movement
   const totalSteps = baseSteps + activitySteps
 

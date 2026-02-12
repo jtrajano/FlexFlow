@@ -3,19 +3,21 @@ import { CircularProgress } from './CircularProgress'
 import { useAuth } from '../../hooks/useAuth'
 import { useUserGoals } from '../../hooks/useUserGoals'
 import { useTodayActivity } from '../../hooks/useTodayActivity'
+import { isCompletedActivity } from '../../utils/activity-log'
 
 export function ProgressSection() {
   const { user } = useAuth()
   const { data: goals, isLoading: goalsLoading } = useUserGoals(user?.uid)
   const { data: activities, isLoading: activitiesLoading } = useTodayActivity(user?.uid)
+  const completedActivities = activities?.filter(isCompletedActivity) || []
 
   // Calculate Daily Totals
-  const totalCalories = activities?.reduce((sum, act) => sum + act.caloriesBurned, 0) || 0
-  const totalMinutes = activities?.reduce((sum, act) => sum + act.durationMinutes, 0) || 0
+  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
 
   // Calculate Stand Hours (hours with activity)
   const activeHours = new Set<number>()
-  activities?.forEach(act => {
+  completedActivities.forEach(act => {
     if (!act.timestamp) return
     const start = new Date(act.timestamp)
     const end = new Date(start.getTime() + act.durationMinutes * 60000)

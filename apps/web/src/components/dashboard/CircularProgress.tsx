@@ -1,4 +1,4 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 
 interface CircularProgressProps {
   value: number
@@ -22,7 +22,19 @@ export function CircularProgress({
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const progress = value / max
-  const dashoffset = circumference - progress * circumference
+  const targetDashoffset = circumference - progress * circumference
+
+  // State to animate from 0 to actual value
+  const [dashoffset, setDashoffset] = useState(circumference)
+
+  useEffect(() => {
+    // Start animation after a brief delay to ensure smooth transition
+    const timer = setTimeout(() => {
+      setDashoffset(targetDashoffset)
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [targetDashoffset])
 
   return (
     <div className="flex flex-col items-center justify-center">

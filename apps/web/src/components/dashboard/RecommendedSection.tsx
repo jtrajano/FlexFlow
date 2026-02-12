@@ -1,4 +1,5 @@
 import React from 'react' // Triggering re-render for style updates
+import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useUserGoals } from '../../hooks/useUserGoals'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
@@ -23,7 +24,10 @@ function WorkoutCard({
   bgGradient,
 }: WorkoutCardProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       className={`relative rounded-2xl overflow-hidden p-5 min-w-[240px] group cursor-pointer transition-transform hover:scale-105 ${bgGradient}`}
     >
       <div className="flex justify-between items-start mb-8">
@@ -82,7 +86,7 @@ function WorkoutCard({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -92,7 +96,10 @@ export function RecommendedSection() {
   const { data: metrics, isLoading: metricsLoading } = useLatestBodyMetrics(user?.uid)
   const { isRestDay, isLoading: scheduleLoading } = useTodaySchedule(user?.uid)
 
-  if (goalsLoading || metricsLoading || scheduleLoading) {
+  // Show loading only if all three are still loading (initial load)
+  const isInitialLoading = goalsLoading && metricsLoading && scheduleLoading
+
+  if (isInitialLoading) {
     return (
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-white mb-4">Recommended</h3>
@@ -105,8 +112,14 @@ export function RecommendedSection() {
     )
   }
 
+  // Use default values if data hasn't loaded yet
   const userPrefs = goals?.workoutPreferences ? goals.workoutPreferences.split(',') : []
-  const recommendations = getRecommendedWorkouts(userPrefs, metrics?.weight || 70, 3, isRestDay)
+  const recommendations = getRecommendedWorkouts(
+    userPrefs,
+    metrics?.weight || 70,
+    3,
+    isRestDay || false
+  )
 
   // Mapping workout types to icons
   const getIcon = (type: string) => {
@@ -236,7 +249,18 @@ export function RecommendedSection() {
         <button className="text-primary text-sm font-medium hover:underline">See all</button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <motion.div
+        className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+      >
         {recommendations.map(workout => (
           <WorkoutCard
             key={workout.id}
@@ -248,7 +272,7 @@ export function RecommendedSection() {
             icon={getIcon(workout.type)}
           />
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }

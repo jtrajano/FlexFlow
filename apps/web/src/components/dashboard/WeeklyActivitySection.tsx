@@ -1,6 +1,7 @@
 import { useAuth } from '../../hooks/useAuth'
 import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useUserGoals } from '../../hooks/useUserGoals'
+import { isCompletedActivity } from '../../utils/activity-log'
 
 interface DayBarProps {
   day: string
@@ -55,7 +56,9 @@ export function WeeklyActivitySection() {
       <div className="bg-gray-900 rounded-2xl p-6 border border-border/50">
         <div className="flex gap-2 items-end">
           {weeklyData?.map(day => {
-            const totalMins = day.activities.reduce((sum, act) => sum + act.durationMinutes, 0)
+            const totalMins = day.activities
+              .filter(isCompletedActivity)
+              .reduce((sum, act) => sum + act.durationMinutes, 0)
             // Height based on duration relative to daily target
             const height = Math.min((totalMins / dailyExerciseTarget) * 100, 100)
 

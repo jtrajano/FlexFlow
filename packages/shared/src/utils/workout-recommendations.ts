@@ -121,6 +121,12 @@ export function getRecommendedWorkouts(
   // If it's a rest day, prioritize active recovery and mental wellness
   const recoveryTypes = ['meditation', 'breathing', 'yoga', 'walking', 'pilates', 'swimming']
 
+  // Map "cardio" preference to specific cardio workout types
+  const cardioTypes = ['hiit', 'swimming', 'walking']
+  const expandedPreferences = userPreferences.flatMap(pref =>
+    pref === 'cardio' ? cardioTypes : [pref]
+  )
+
   let library = WORKOUT_TEMPLATES
 
   if (isRestDay) {
@@ -138,8 +144,8 @@ export function getRecommendedWorkouts(
 
     library = results
   } else {
-    // Normal day: filter based on user's preferred workout types
-    const preferredMatches = library.filter(t => userPreferences.includes(t.type))
+    // Normal day: filter based on user's preferred workout types (with expanded cardio)
+    const preferredMatches = library.filter(t => expandedPreferences.includes(t.type))
     if (preferredMatches.length > 0) {
       library = preferredMatches
     }

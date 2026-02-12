@@ -11,6 +11,7 @@ import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
 import { StatisticsPage } from './StatisticsPage'
 import { ProfileView } from './ProfileView'
+import { RunningActivitySection } from './RunningActivitySection'
 
 export function Dashboard() {
   const [showLogModal, setShowLogModal] = useState(false)
@@ -32,6 +33,7 @@ export function Dashboard() {
           <>
             <GreetingHeader />
             <GoalCard onStartClick={() => setActiveTab('log-activity')} />
+            <RunningActivitySection />
             <ProgressSection />
             <StatsSection />
             <RecommendedSection />
