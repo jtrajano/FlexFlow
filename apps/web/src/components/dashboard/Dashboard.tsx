@@ -9,6 +9,7 @@ import { BottomNav } from './BottomNav'
 import { LogActivityModal } from './LogActivityModal'
 import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
+import { StatisticsPage } from './StatisticsPage'
 
 export function Dashboard() {
   const [showLogModal, setShowLogModal] = useState(false)
@@ -20,7 +21,9 @@ export function Dashboard() {
         return <WorkoutsView onBack={() => setActiveTab('home')} />
       case 'log-activity':
         return <LogActivityView onBack={() => setActiveTab('home')} />
-      // Add other cases later ('stats', 'profile')
+      case 'stats':
+        return <StatisticsPage onBack={() => setActiveTab('home')} />
+      // Add other cases later ('profile')
       default:
         return (
           <>
