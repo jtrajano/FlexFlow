@@ -328,7 +328,7 @@ export function RecommendationView({ data, onComplete, onBack }: RecommendationV
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Start Training
+          Set Schedule
           <svg
             width="20"
             height="20"

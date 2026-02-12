@@ -12,3 +12,6 @@ export type { BodyMetrics } from './body-metrics'
 
 export { ActivityLogSchema, ActivityTypeEnum } from './activity-log'
 export type { ActivityLog, ActivityType } from './activity-log'
+
+export { WorkoutScheduleSchema } from './workout-schedule'
+export type { WorkoutSchedule, WorkoutScheduleItem } from './workout-schedule'

@@ -1,4 +1,5 @@
 import { OnboardingData } from '../types/onboarding'
+import { WorkoutScheduleItem, DayOfWeek } from '../schemas/workout-schedule'
 
 export interface WorkoutTypeDistribution {
   workoutType: string
@@ -139,6 +140,66 @@ export function calculateTargets(data: OnboardingData): FitnessTargets {
     dailyExerciseTarget,
     workoutTypeDistribution,
   }
+}
+
+/**
+ * Generates a default workout schedule based on target frequency and distribution.
+ * Spaced out across the week.
+ */
+export function generateDefaultSchedule(targets: FitnessTargets): WorkoutScheduleItem[] {
+  const days: DayOfWeek[] = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ]
+  const schedule: WorkoutScheduleItem[] = days.map(day => ({
+    dayOfWeek: day,
+    durationMinutes: 0,
+    timeOfDay: '18:00',
+    isRestDay: true,
+  }))
+
+  const { workoutTypeDistribution, weeklyWorkoutFrequencyTarget } = targets
+
+  // Flatten sessions into a list of workout types to assign
+  const sessionsToAssign: { type: string; mins: number }[] = []
+  workoutTypeDistribution.forEach(dist => {
+    if (dist.weeklySessions <= 0) return
+    const minsPerSession = Math.round(dist.weeklyMinutes / dist.weeklySessions)
+    for (let i = 0; i < dist.weeklySessions; i++) {
+      sessionsToAssign.push({
+        type: dist.workoutType,
+        mins: minsPerSession,
+      })
+    }
+  })
+
+  // Basic spacing logic:
+  const totalDays = 7
+  const freq = Math.max(1, Math.min(weeklyWorkoutFrequencyTarget, totalDays))
+  const stride = totalDays / freq
+
+  for (let i = 0; i < sessionsToAssign.length; i++) {
+    const dayIndex = Math.floor(i * stride) % totalDays
+    const session = sessionsToAssign[i]
+
+    // Find the nearest available day (starting from dayIndex)
+    for (let offset = 0; offset < totalDays; offset++) {
+      const idx = (dayIndex + offset) % totalDays
+      if (schedule[idx].isRestDay) {
+        schedule[idx].workoutType = session.type
+        schedule[idx].durationMinutes = session.mins
+        schedule[idx].isRestDay = false
+        break
+      }
+    }
+  }
+
+  return schedule
 }
 
 /**

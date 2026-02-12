@@ -51,7 +51,7 @@ import './style.css'
 
 import { doc, setDoc, updateDoc, collection } from 'firebase/firestore'
 import { db } from './lib/firebase'
-import { OnboardingData, calculateTargets, FitnessTargets } from '@repo/shared'
+import { OnboardingData, calculateTargets, FitnessTargets, WorkoutScheduleItem } from '@repo/shared'
 
 import { useAuth } from './hooks/useAuth'
 import { LoginView } from './components/auth/LoginView'
@@ -83,7 +83,7 @@ export function App() {
   }
 
   const saveGoals = async (data: OnboardingData, targets: FitnessTargets) => {
-    if (!user) return
+    if (!user) return null
     const currentDate = new Date().toISOString()
     const goalsRef = doc(collection(db, 'userGoals'))
     await setDoc(goalsRef, {
@@ -100,12 +100,32 @@ export function App() {
       workoutTypeDistribution: targets.workoutTypeDistribution,
       createdAt: currentDate,
     })
+    return goalsRef.id
+  }
+
+  const saveSchedule = async (scheduleItems: WorkoutScheduleItem[], userGoalId: string) => {
+    if (!user) return
+    const currentDate = new Date().toISOString()
+    const scheduleRef = doc(collection(db, 'userWorkoutSchedules'))
+    await setDoc(scheduleRef, {
+      uid: scheduleRef.id,
+      userId: user.uid,
+      userGoalId: userGoalId,
+      items: scheduleItems.map(item => ({
+        ...item,
+        workoutType: item.workoutType || null, // Convert undefined to null for Firestore
+      })),
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    })
   }
 
   const handleOnboardingComplete = async (
     data: OnboardingData,
     customTargets?: FitnessTargets,
-    hasChanges?: boolean
+    hasChanges?: boolean,
+    schedule?: WorkoutScheduleItem[],
+    userGoalId?: string
   ) => {
     if (!user) return
 
@@ -145,8 +165,15 @@ export function App() {
 
       // 4. Create UserGoals record only if they were modified at the recommendation step.
       // A base record was already saved during the transition to the recommendation view.
+      let finalGoalId = userGoalId
       if (hasChanges) {
-        await saveGoals(data, targets)
+        const newId = await saveGoals(data, targets)
+        if (newId) finalGoalId = newId
+      }
+
+      // 5. Save Schedule if provided
+      if (schedule && finalGoalId) {
+        await saveSchedule(schedule, finalGoalId)
       }
 
       setOnboardedName(data.name)

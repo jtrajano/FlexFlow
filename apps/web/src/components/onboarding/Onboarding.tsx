@@ -8,11 +8,18 @@ import { Step2FitnessGoal } from './Step2FitnessGoal'
 import { Step3ActivityLevel } from './Step3ActivityLevel'
 import { Step4WorkoutPreferences } from './Step4WorkoutPreferences'
 import { RecommendationView } from './RecommendationView'
-import { OnboardingData, FitnessTargets, calculateTargets } from '@repo/shared'
+import { ScheduleView } from './ScheduleView'
+import { OnboardingData, FitnessTargets, calculateTargets, WorkoutScheduleItem } from '@repo/shared'
 
 interface OnboardingProps {
-  onComplete: (data: OnboardingData, targets?: FitnessTargets, hasChanges?: boolean) => void
-  onSaveGoals: (data: OnboardingData, targets: FitnessTargets) => Promise<void>
+  onComplete: (
+    data: OnboardingData,
+    targets?: FitnessTargets,
+    hasChanges?: boolean,
+    schedule?: WorkoutScheduleItem[],
+    userGoalId?: string
+  ) => void
+  onSaveGoals: (data: OnboardingData, targets: FitnessTargets) => Promise<string | null | void>
 }
 
 export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
@@ -29,7 +36,11 @@ export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
     workoutPreferences: [],
   })
 
-  const totalSteps = 5
+  const [finalTargets, setFinalTargets] = useState<FitnessTargets | null>(null)
+  const [hasChangesFlag, setHasChangesFlag] = useState(false)
+  const [lastSavedGoalId, setLastSavedGoalId] = useState<string | null>(null)
+
+  const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
 
   const handleSignOut = async () => {
@@ -50,16 +61,24 @@ export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
       // save the automated computation record.
       if (currentStep === 4) {
         const targets = calculateTargets(updatedData)
-        onSaveGoals(updatedData, targets).catch(err =>
-          console.error('Error saving initial goals:', err)
-        )
+        onSaveGoals(updatedData, targets)
+          .then(id => {
+            if (typeof id === 'string') setLastSavedGoalId(id)
+          })
+          .catch(err => console.error('Error saving initial goals:', err))
       }
       setCurrentStep(currentStep + 1)
     }
   }
 
   const handleRecommendationComplete = (targets: FitnessTargets, hasChanges: boolean) => {
-    onComplete(data, targets, hasChanges)
+    setFinalTargets(targets)
+    setHasChangesFlag(hasChanges)
+    setCurrentStep(currentStep + 1)
+  }
+
+  const handleScheduleComplete = (schedule: WorkoutScheduleItem[]) => {
+    onComplete(data, finalTargets!, hasChangesFlag, schedule, lastSavedGoalId || undefined)
   }
 
   const handleBack = () => {
@@ -123,6 +142,14 @@ export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
                 key="step5"
                 data={data}
                 onComplete={handleRecommendationComplete}
+                onBack={handleBack}
+              />
+            )}
+            {currentStep === 6 && finalTargets && (
+              <ScheduleView
+                key="step6"
+                targets={finalTargets}
+                onComplete={handleScheduleComplete}
                 onBack={handleBack}
               />
             )}
