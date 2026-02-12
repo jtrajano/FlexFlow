@@ -1,6 +1,8 @@
 import { Button } from '@repo/ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 import { useTodaySchedule } from '../../hooks/useUserSchedule'
+import { useRunningActivity } from '../../hooks/useRunningActivity'
+import { RunningActivitySection } from './RunningActivitySection'
 
 interface GoalCardProps {
   onStartClick?: () => void
@@ -9,19 +11,22 @@ interface GoalCardProps {
 export function GoalCard({ onStartClick }: GoalCardProps) {
   const { user } = useAuth()
   const { todayWorkout, isRestDay, isLoading } = useTodaySchedule(user?.uid)
+  const { data: runningActivity, isLoading: runningLoading } = useRunningActivity(user?.uid)
 
-  if (isLoading) {
+  if (isLoading || runningLoading) {
     return <div className="rounded-2xl h-48 bg-gray-900 animate-pulse mb-8" />
+  }
+
+  if (runningActivity) {
+    return <RunningActivitySection className="mb-8" />
   }
 
   return (
     <div className="relative rounded-2xl overflow-hidden mb-8 h-48 group">
-      {/* Background Image/Gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-green-900/90 to-black/80 z-0">
         <div className="absolute inset-0 bg-[url('/hero-fitness.jpg')] bg-cover bg-center mix-blend-overlay opacity-40"></div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-center px-6 md:px-10">
         <span className="text-primary font-bold tracking-wider text-xs uppercase mb-2">
           TODAY'S GOAL
@@ -43,7 +48,6 @@ export function GoalCard({ onStartClick }: GoalCardProps) {
         </Button>
       </div>
 
-      {/* Decorative blurred glow */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none"></div>
     </div>
   )

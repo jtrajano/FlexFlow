@@ -59,6 +59,9 @@ export function LogActivityModal({ isOpen, onClose }: LogActivityModalProps) {
         durationMinutes: duration,
         caloriesBurned: caloriesBurned,
         timestamp: selectedDate.toISOString(),
+        status: 'completed',
+        startTime: selectedDate.toISOString(),
+        endTime: new Date(selectedDate.getTime() + duration * 60000).toISOString(),
         date: selectedDate.toLocaleDateString('en-CA'), // YYYY-MM-DD (local)
       })
 

@@ -21,7 +21,7 @@ export function CircularProgress({
 }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
-  const progress = value / max
+  const progress = Math.min(Math.max(value / max, 0), 1)
   const targetDashoffset = circumference - progress * circumference
 
   // State to animate from 0 to actual value

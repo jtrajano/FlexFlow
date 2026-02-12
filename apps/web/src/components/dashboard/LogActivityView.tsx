@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase'
 import { useAuth } from '../../hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRunningActivity } from '../../hooks/useRunningActivity'
+import { ManualActivityModal } from './ManualActivityModal'
 
 const activities = [
   { id: 'strength', title: 'Strength', icon: '💪' },
@@ -22,6 +23,7 @@ export function LogActivityView({ onBack }: { onBack: () => void }) {
   const queryClient = useQueryClient()
 
   const [selectedType, setSelectedType] = useState<string>('cardio')
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleStartActivity = async () => {
@@ -68,11 +70,28 @@ export function LogActivityView({ onBack }: { onBack: () => void }) {
 
   return (
     <motion.div className="max-w-4xl mx-auto pb-24 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Start Activity</h1>
-        <p className="text-gray-400 text-sm">
-          Start now, then stop from the dashboard when your workout is done.
-        </p>
+      <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md py-4 -mx-4 px-4 flex items-center justify-between border-b border-white/5">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tighter">Log Activity</h1>
+          <p className="text-gray-400 text-sm">
+            Start live activity or open Manual Activity for past sessions.
+          </p>
+        </div>
+        <button
+          onClick={onBack}
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 relative">
@@ -101,52 +120,46 @@ export function LogActivityView({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-gray-900/80 to-black/40 border border-white/10 rounded-3xl p-6 shadow-xl space-y-8">
-          <div className="rounded-2xl border border-[#a3e635]/30 bg-[#a3e635]/10 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#a3e635]">
-              Live Session
-            </p>
-            <p className="mt-2 text-sm text-gray-300">
-              Start creates an in-progress activity and returns to dashboard immediately.
-            </p>
-            <p className="mt-1 text-sm text-gray-300">
-              The dashboard shows elapsed time from start time until you press Stop.
-            </p>
+        <div className="bg-gradient-to-r from-gray-900/80 to-black/40 border border-white/10 rounded-3xl p-6 shadow-xl">
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={handleStartActivity}
+              disabled={isSubmitting || !!runningActivity}
+              className="h-full rounded-2xl border border-[#a3e635]/30 bg-[#a3e635]/10 p-5 text-left transition-all hover:bg-[#a3e635]/15 disabled:opacity-60"
+            >
+              <p className="text-xs font-bold uppercase tracking-widest text-[#a3e635]">
+                Live Session (Start Now)
+              </p>
+              <p className="mt-2 text-sm text-gray-300">
+                Start creates an in-progress activity and returns to dashboard immediately.
+              </p>
+              <p className="mt-1 text-sm text-gray-300">
+                The dashboard shows elapsed time from start time until you press Stop.
+              </p>
+              <p className="mt-3 text-sm font-bold text-white">
+                {runningActivity ? 'Activity In Progress' : isSubmitting ? 'Starting...' : 'Start'}
+              </p>
+            </button>
+
+            <button
+              onClick={() => setIsManualModalOpen(true)}
+              className="h-full w-full rounded-2xl border border-white/15 bg-white/5 p-5 text-left transition-all hover:bg-white/10 hover:border-white/25"
+            >
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-300">
+                Manual Activity
+              </p>
+              <p className="mt-2 text-sm text-gray-300">
+                Log a completed past activity using start and end date/time.
+              </p>
+            </button>
           </div>
         </div>
       </div>
-
-      <div className="fixed bottom-8 left-0 right-0 px-4 z-40">
-        <div className="max-w-4xl mx-auto flex justify-center gap-3">
-          <button
-            onClick={onBack}
-            className="px-8 py-4 rounded-2xl font-semibold text-lg border-2 border-white/10 text-white hover:bg-white/5 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleStartActivity}
-            disabled={isSubmitting || !!runningActivity}
-            className="px-8 py-4 rounded-2xl font-black text-lg bg-[#a3e635] text-black hover:bg-[#bef264] shadow-[0_10px_30px_rgba(163,230,53,0.3)] transition-all flex items-center justify-center gap-3 group disabled:opacity-50 disabled:hover:scale-100"
-          >
-            {runningActivity ? 'Activity In Progress' : isSubmitting ? 'Starting...' : 'Start'}
-            {!isSubmitting && (
-              <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </div>
-            )}
-          </button>
-        </div>
-      </div>
+      <ManualActivityModal
+        isOpen={isManualModalOpen}
+        onClose={() => setIsManualModalOpen(false)}
+        selectedType={selectedType}
+      />
     </motion.div>
   )
 }

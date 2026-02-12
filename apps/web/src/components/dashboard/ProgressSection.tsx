@@ -1,4 +1,3 @@
-import React from 'react'
 import { CircularProgress } from './CircularProgress'
 import { useAuth } from '../../hooks/useAuth'
 import { useUserGoals } from '../../hooks/useUserGoals'
@@ -37,6 +36,7 @@ export function ProgressSection() {
 
   // Use pre-computed Daily Targets from Firestore
   // Default values until goals are loaded or if they don't exist
+
   const dailyMoveTarget = goals?.dailyMoveTarget || 500
   const dailyExerciseTarget = goals?.dailyExerciseTarget || 30
   const dailyStandTarget = 12 // Default Apple Health standard

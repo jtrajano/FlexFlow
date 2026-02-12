@@ -8,6 +8,11 @@ import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
 import { getActivityDurationMinutes } from '../../utils/activity-log'
 import { db } from '../../lib/firebase'
 
+interface RunningActivitySectionProps {
+  className?: string
+  embedded?: boolean
+}
+
 function formatElapsedTime(startTime: string | undefined, nowMs: number): string {
   if (!startTime) return '00:00:00'
   const startMs = new Date(startTime).getTime()
@@ -24,7 +29,10 @@ function formatElapsedTime(startTime: string | undefined, nowMs: number): string
   return `${hh}:${mm}:${ss}`
 }
 
-export function RunningActivitySection() {
+export function RunningActivitySection({
+  className,
+  embedded = false,
+}: RunningActivitySectionProps) {
   const { user } = useAuth()
   const { data: runningActivity, isLoading } = useRunningActivity(user?.uid)
   const { data: metrics } = useLatestBodyMetrics(user?.uid)
@@ -77,8 +85,31 @@ export function RunningActivitySection() {
 
   if (isLoading || !runningActivity) return null
 
+  if (embedded) {
+    return (
+      <div className={`min-w-[220px] rounded-xl bg-black/30 p-4 text-right ${className || ''}`}>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#a3e635]">
+          Activity In Progress
+        </p>
+        <h3 className="mt-1 text-lg font-black text-white capitalize">{runningActivity.type}</h3>
+        <p className="mt-1 font-mono text-2xl font-black text-white">{elapsed}</p>
+        <div className="mt-3 flex justify-end">
+          <button
+            onClick={handleStop}
+            disabled={isStopping}
+            className="rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-red-400 disabled:opacity-60"
+          >
+            {isStopping ? 'Stopping...' : 'Stop'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="mb-8 rounded-2xl border border-[#a3e635]/30 bg-gradient-to-r from-[#a3e635]/15 to-[#84cc16]/5 p-5">
+    <div
+      className={`mb-8 rounded-2xl bg-gradient-to-r from-[#a3e635]/15 to-[#84cc16]/5 p-5 ${className || ''}`}
+    >
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-[#a3e635]">
