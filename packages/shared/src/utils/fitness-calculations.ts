@@ -215,6 +215,8 @@ export const MET_VALUES: Record<string, number> = {
   crossfit: 10.0,
   swimming: 8.0,
   walking: 3.5,
+  meditation: 1.0,
+  breathing: 1.0,
 }
 
 /**
