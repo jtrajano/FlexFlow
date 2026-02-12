@@ -5,7 +5,15 @@ import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
 import { estimateSteps } from '@repo/shared'
 
-function StatCard({ label, value, unit, icon, color = 'bg-[#a3e635]' }: unknown) {
+interface StatCardProps {
+  label: string
+  value: string | number
+  unit?: string
+  icon: React.ReactNode
+  color?: string
+}
+
+function StatCard({ label, value, unit, icon, color = 'bg-[#a3e635]' }: StatCardProps) {
   return (
     <div className="bg-gray-900/50 backdrop-blur-md border border-white/10 p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group hover:border-white/20 transition-all">
       <div
