@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../lib/firebase'
 
-export function GreetingHeader() {
+export function GreetingHeader({ onHistoryClick }: { onHistoryClick?: () => void }) {
   const { user } = useAuth()
 
   // Extracting first name if available, or fallback
@@ -27,8 +27,10 @@ export function GreetingHeader() {
 
       <div className="flex items-center gap-3">
         <button
-          className="p-2.5 rounded-full bg-muted/20 hover:bg-muted/30 transition-colors relative group"
-          aria-label="Notifications"
+          onClick={onHistoryClick}
+          className="p-2 rounded-full bg-muted/20 hover:bg-muted/30 text-muted-foreground hover:text-white transition-colors"
+          aria-label="Activity History"
+          title="Activity History"
         >
           <svg
             width="24"
@@ -39,13 +41,11 @@ export function GreetingHeader() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-muted-foreground"
           >
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            <polyline points="3 3 3 9 9 9" />
+            <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+            <path d="M12 7v5l3 3" />
           </svg>
-          {/* Notification dot */}
-          <span className="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border border-background"></span>
         </button>
 
         <button

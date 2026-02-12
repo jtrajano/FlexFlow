@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { GreetingHeader } from './GreetingHeader'
 import { GoalCard } from './GoalCard'
 import { ProgressSection } from './ProgressSection'
@@ -11,6 +11,7 @@ import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
 import { StatisticsPage } from './StatisticsPage'
 import { ProfileView } from './ProfileView'
+import { ActivityHistoryView } from './ActivityHistoryView'
 import { useAuth } from '../../hooks/useAuth'
 import { useRunningActivity } from '../../hooks/useRunningActivity'
 
@@ -30,11 +31,13 @@ export function Dashboard() {
         return <StatisticsPage onBack={() => setActiveTab('home')} />
       case 'profile':
         return <ProfileView onBack={() => setActiveTab('home')} />
+      case 'activity-history':
+        return <ActivityHistoryView onBack={() => setActiveTab('home')} />
       // Add other cases later
       default:
         return (
           <>
-            <GreetingHeader />
+            <GreetingHeader onHistoryClick={() => setActiveTab('activity-history')} />
             <GoalCard onStartClick={() => setActiveTab('log-activity')} />
             <ProgressSection />
             <StatsSection />
@@ -52,7 +55,8 @@ export function Dashboard() {
       {activeTab !== 'workouts' &&
         activeTab !== 'log-activity' &&
         activeTab !== 'stats' &&
-        activeTab !== 'profile' && (
+        activeTab !== 'profile' &&
+        activeTab !== 'activity-history' && (
           <BottomNav
             onAddClick={() => setActiveTab('log-activity')}
             activeTab={activeTab}
