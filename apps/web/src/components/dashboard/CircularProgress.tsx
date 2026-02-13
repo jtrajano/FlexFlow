@@ -8,6 +8,7 @@ interface CircularProgressProps {
   color: string
   size?: number
   strokeWidth?: number
+  decimals?: number // Number of decimal places to display (default: 0)
 }
 
 export function CircularProgress({
@@ -18,6 +19,7 @@ export function CircularProgress({
   color,
   size = 120,
   strokeWidth = 8,
+  decimals = 0,
 }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
@@ -71,7 +73,9 @@ export function CircularProgress({
         </svg>
         {/* Value Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xl font-bold text-white leading-none">{value}</span>
+          <span className="text-xl font-bold text-white leading-none">
+            {decimals > 0 ? value.toFixed(decimals) : value}
+          </span>
           {unit && (
             <span className="text-[10px] text-muted-foreground uppercase mt-0.5">{unit}</span>
           )}

@@ -59,13 +59,16 @@ export function RunningActivitySection({
     setIsStopping(true)
     try {
       const endTime = new Date()
-      const computedMinutes = getActivityDurationMinutes(runningActivity, endTime)
-      const durationMinutes = Math.max(1, computedMinutes)
+      // Get precise duration in minutes (can be decimal)
+      const preciseMinutes = getActivityDurationMinutes(runningActivity, endTime)
+      // Calculate calories with precise minutes for accuracy
       const caloriesBurned = calculateActivityCalories(
         runningActivity.type,
-        durationMinutes,
+        preciseMinutes,
         metrics?.weight || 70
       )
+      // Round to whole minutes for storage (ensure at least 1 minute)
+      const durationMinutes = Math.max(1, Math.round(preciseMinutes))
 
       await updateDoc(doc(db, 'activityLogs', runningActivity.uid), {
         status: 'completed',

@@ -100,9 +100,23 @@ export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
               <div className="h-4 w-px bg-white/10" />
               <button
                 onClick={handleSignOut}
-                className="text-xs font-medium text-red-400/80 hover:text-red-400 transition-colors uppercase tracking-wider"
+                className="p-2 rounded-lg text-red-400/80 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                title="Sign Out"
               >
-                Sign Out
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
               </button>
             </div>
             <span className="text-lg font-bold text-[#a3e635]">{progress.toFixed(0)}%</span>

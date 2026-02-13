@@ -75,6 +75,7 @@ export function calculateTargets(data: OnboardingData): FitnessTargets {
 
   const weeklyCalorieBurnTarget = Math.round(dailyCalorieGoal * 7)
   const dailyMoveTarget = Math.round(dailyCalorieGoal)
+  // Calculate daily exercise target in precise minutes (7 days per week)
   const dailyExerciseTarget = Math.round(weeklyWorkoutMinutes / 7)
 
   // 5. Workout Type Distribution
@@ -222,6 +223,10 @@ export const MET_VALUES: Record<string, number> = {
 /**
  * Calculates calories burned for an activity based on MET, weight, and duration.
  * Formula: Calories = MET * weight (kg) * duration (hours)
+ * @param type - Activity type (e.g., 'cardio', 'strength')
+ * @param durationMinutes - Duration in precise minutes (can be decimal)
+ * @param weightKg - User weight in kilograms
+ * @returns Calories burned (rounded to whole number)
  */
 export function calculateActivityCalories(
   type: string,
@@ -229,6 +234,7 @@ export function calculateActivityCalories(
   weightKg: number
 ): number {
   const met = MET_VALUES[type] || 3.5 // Fallback to walking MET
+  // Convert minutes to hours for MET formula (1 hour = 60 minutes)
   const durationHours = durationMinutes / 60
   return Math.round(met * weightKg * durationHours)
 }

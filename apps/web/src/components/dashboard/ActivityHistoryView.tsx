@@ -84,6 +84,8 @@ export function ActivityHistoryView({ onBack }: { onBack: () => void }) {
           {paginatedActivities.map(activity => {
             const status = getActivityStatus(activity)
             const duration = getActivityDurationMinutes(activity)
+            // Round duration to nearest hundredths (2 decimal places)
+            const formattedDuration = duration.toFixed(2)
             return (
               <div
                 key={activity.uid}
@@ -95,7 +97,7 @@ export function ActivityHistoryView({ onBack }: { onBack: () => void }) {
                     {formatDateTime(activity.startTime || activity.timestamp)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {duration} min • {activity.caloriesBurned} kcal
+                    {formattedDuration} min • {activity.caloriesBurned} kcal
                   </p>
                 </div>
                 <span

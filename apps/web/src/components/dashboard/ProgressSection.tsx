@@ -2,7 +2,7 @@ import { CircularProgress } from './CircularProgress'
 import { useAuth } from '../../hooks/useAuth'
 import { useUserGoals } from '../../hooks/useUserGoals'
 import { useTodayActivity } from '../../hooks/useTodayActivity'
-import { isCompletedActivity } from '../../utils/activity-log'
+import { isCompletedActivity, getActivityDurationMinutes } from '../../utils/activity-log'
 
 export function ProgressSection() {
   const { user } = useAuth()
@@ -10,16 +10,21 @@ export function ProgressSection() {
   const { data: activities, isLoading: activitiesLoading } = useTodayActivity(user?.uid)
   const completedActivities = activities?.filter(isCompletedActivity) || []
 
-  // Calculate Daily Totals
+  // Calculate Daily Totals (using precise minute values calculated from timestamps)
   const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
+  const totalMinutes = completedActivities.reduce(
+    (sum, act) => sum + getActivityDurationMinutes(act),
+    0
+  )
 
   // Calculate Stand Hours (hours with activity)
   const activeHours = new Set<number>()
   completedActivities.forEach(act => {
     if (!act.timestamp) return
     const start = new Date(act.timestamp)
-    const end = new Date(start.getTime() + act.durationMinutes * 60000)
+    // Convert precise minutes to milliseconds (1 minute = 60000 ms)
+    const activityMinutes = getActivityDurationMinutes(act)
+    const end = new Date(start.getTime() + activityMinutes * 60000)
 
     // Mark start hour
     activeHours.add(start.getHours())
@@ -69,6 +74,7 @@ export function ProgressSection() {
             label="Exercise"
             unit="min"
             color="#f97316" // orange-500
+            decimals={2}
           />
           <CircularProgress
             value={standProgress}

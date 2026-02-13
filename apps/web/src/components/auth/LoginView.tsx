@@ -6,15 +6,6 @@ import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth'
 import { auth } from '../../lib/firebase'
-import { Button } from '@repo/ui/Button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@repo/ui/Card'
 
 export const LoginView: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -54,22 +45,38 @@ export const LoginView: React.FC = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/30 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to FlexFlow</CardTitle>
-          <CardDescription>
-            {isSignUp ? 'Create an account to start tracking' : 'Sign in to your account'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-full py-6 text-base"
+    <div className="relative flex items-center justify-center min-h-screen bg-black px-4 overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-black to-black">
+        <div className="absolute inset-0 bg-[url('/hero-fitness.jpg')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
+      </div>
+
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-[#a3e635]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
+
+      {/* Login card */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-gray-900/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
+              Welcome to <span className="text-[#a3e635]">FlexFlow</span>
+            </h1>
+            <p className="text-gray-400 text-sm">
+              {isSignUp
+                ? 'Create an account to start your fitness journey'
+                : 'Sign in to continue your fitness journey'}
+            </p>
+          </div>
+
+          {/* Google Sign In */}
+          <button
             onClick={handleGoogleLogin}
             disabled={loading}
+            className="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 mb-6 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -88,63 +95,85 @@ export const LoginView: React.FC = () => {
               />
             </svg>
             Continue with Google
-          </Button>
+          </button>
 
-          <div className="relative">
+          {/* Divider */}
+          <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-gray-900 px-4 text-gray-500 font-bold tracking-wider">
                 Or continue with email
               </span>
             </div>
           </div>
 
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          {/* Email form */}
+          <form onSubmit={handleEmailAuth} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="email">
+              <label
+                className="text-sm font-bold text-gray-400 uppercase tracking-wide"
+                htmlFor="email"
+              >
                 Email
               </label>
               <input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="your@email.com"
+                className="w-full bg-white/5 border border-white/10 text-white placeholder-gray-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a3e635] focus:border-transparent transition-all"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="password">
+              <label
+                className="text-sm font-bold text-gray-400 uppercase tracking-wide"
+                htmlFor="password"
+              >
                 Password
               </label>
               <input
                 id="password"
                 type="password"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 text-white placeholder-gray-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a3e635] focus:border-transparent transition-all"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
-            {error && <p className="text-sm text-destructive font-medium">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
-            </Button>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-3">
+                <p className="text-sm text-red-400 font-medium">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#a3e635] hover:bg-[#a3e635]/90 text-black font-bold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#a3e635]/20"
+            >
+              {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
+            </button>
           </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button
-            variant="ghost"
-            className="text-sm text-muted-foreground no-underline hover:text-primary p-0 h-auto"
-            onClick={() => setIsSignUp(!isSignUp)}
-          >
-            {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-          </Button>
-        </CardFooter>
-      </Card>
+
+          {/* Toggle sign up/sign in */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-gray-400 hover:text-[#a3e635] transition-colors font-medium"
+            >
+              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
