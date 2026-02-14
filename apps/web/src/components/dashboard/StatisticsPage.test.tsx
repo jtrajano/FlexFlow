@@ -6,6 +6,15 @@ import { useAuth } from '../../hooks/useAuth'
 import { useTodayActivity } from '../../hooks/useTodayActivity'
 import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { estimateSteps } from '@repo/shared'
+import {
+  buildDailyStats,
+  buildWeeklyStats,
+  buildPersonalRecords,
+  buildWeeklyTrendData,
+  buildPerformanceInsights,
+  formatMinutes,
+} from './StatisticsPage'
 
 // Mock all hooks
 vi.mock('../../hooks/useAuth')
@@ -882,5 +891,184 @@ describe('StatisticsPage Integration with Dashboard', () => {
     expect(screen.getByText('💪 Workout Distribution')).toBeInTheDocument()
     expect(screen.getByText('🏆 Personal Records')).toBeInTheDocument()
     expect(screen.getByText('✨ Performance Insights')).toBeInTheDocument()
+  })
+})
+
+describe('StatisticsPage pure functions', () => {
+  describe('formatMinutes', () => {
+    it('formats minutes under one hour', () => {
+      expect(formatMinutes(45)).toBe('45m')
+    })
+
+    it('formats minutes over one hour', () => {
+      expect(formatMinutes(125)).toBe('2h 5m')
+    })
+  })
+
+  describe('buildDailyStats', () => {
+    it('builds total calories, minutes, and steps with base steps', () => {
+      const activities = [
+        { type: 'cardio', durationMinutes: 30, caloriesBurned: 300 },
+        { type: 'strength', durationMinutes: 45, caloriesBurned: 350 },
+      ]
+
+      const result = buildDailyStats(activities)
+      const expectedSteps =
+        2500 +
+        estimateSteps(activities[0].type, activities[0].durationMinutes) +
+        estimateSteps(activities[1].type, activities[1].durationMinutes)
+
+      expect(result).toEqual({
+        totalCalories: 650,
+        totalMinutes: 75,
+        totalSteps: expectedSteps,
+      })
+    })
+  })
+
+  describe('buildWeeklyStats', () => {
+    it('builds weekly aggregate stats', () => {
+      const weeklyData = [
+        {
+          dayName: 'Monday',
+          activities: [
+            { type: 'cardio', durationMinutes: 30, caloriesBurned: 300 },
+            { type: 'yoga', durationMinutes: 20, caloriesBurned: 120 },
+          ],
+        },
+        {
+          dayName: 'Tuesday',
+          activities: [],
+        },
+        {
+          dayName: 'Wednesday',
+          activities: [{ type: 'strength', durationMinutes: 40, caloriesBurned: 280 }],
+        },
+      ]
+
+      expect(buildWeeklyStats(weeklyData)).toEqual({
+        weeklyCalories: 700,
+        avgDailyCalories: 233,
+        weeklyMinutes: 90,
+        weeklyWorkouts: 3,
+        activeDays: 2,
+        currentStreak: 2,
+      })
+    })
+
+    it('returns zeros for empty weekly data', () => {
+      expect(buildWeeklyStats([])).toEqual({
+        weeklyCalories: 0,
+        avgDailyCalories: 0,
+        weeklyMinutes: 0,
+        weeklyWorkouts: 0,
+        activeDays: 0,
+        currentStreak: 0,
+      })
+    })
+  })
+
+  describe('buildPersonalRecords', () => {
+    it('builds records from weekly activities and weekly stats', () => {
+      const weeklyData = [
+        {
+          dayName: 'Monday',
+          activities: [{ type: 'cardio', durationMinutes: 30, caloriesBurned: 300 }],
+        },
+        {
+          dayName: 'Tuesday',
+          activities: [{ type: 'strength', durationMinutes: 60, caloriesBurned: 450 }],
+        },
+      ]
+      const weeklyStats = {
+        weeklyCalories: 750,
+        avgDailyCalories: 375,
+        weeklyMinutes: 90,
+        weeklyWorkouts: 2,
+        activeDays: 2,
+        currentStreak: 2,
+      }
+
+      expect(buildPersonalRecords(weeklyData, weeklyStats)).toEqual({
+        longestWorkout: 60,
+        highestCaloriesSession: 450,
+        mostSessionsInWeek: 2,
+        bestStreak: 2,
+      })
+    })
+  })
+
+  describe('buildWeeklyTrendData', () => {
+    it('normalizes day calories to chart heights with minimum visible bar', () => {
+      const weeklyData = [
+        {
+          dayName: 'Monday',
+          activities: [{ type: 'cardio', durationMinutes: 30, caloriesBurned: 50 }],
+        },
+        {
+          dayName: 'Tuesday',
+          activities: [{ type: 'strength', durationMinutes: 40, caloriesBurned: 200 }],
+        },
+        {
+          dayName: 'Wednesday',
+          activities: [],
+        },
+      ]
+
+      expect(buildWeeklyTrendData(weeklyData)).toEqual([
+        { dayName: 'Monday', dayCalories: 50, height: 25 },
+        { dayName: 'Tuesday', dayCalories: 200, height: 100 },
+        { dayName: 'Wednesday', dayCalories: 0, height: 0 },
+      ])
+    })
+
+    it('uses minimum bar height of 10 for low non-zero values', () => {
+      const weeklyData = [
+        {
+          dayName: 'Monday',
+          activities: [{ type: 'cardio', durationMinutes: 10, caloriesBurned: 1 }],
+        },
+        {
+          dayName: 'Tuesday',
+          activities: [{ type: 'strength', durationMinutes: 10, caloriesBurned: 100 }],
+        },
+      ]
+
+      const result = buildWeeklyTrendData(weeklyData)
+      expect(result[0].height).toBe(10)
+      expect(result[1].height).toBe(100)
+    })
+  })
+
+  describe('buildPerformanceInsights', () => {
+    it('returns active day + completion rate + momentum insight', () => {
+      const weeklyData = [
+        {
+          dayName: 'Monday',
+          activities: [{ type: 'cardio', durationMinutes: 10, caloriesBurned: 50 }],
+        },
+        { dayName: 'Tuesday', activities: [] },
+      ]
+      const activities = [
+        { type: 'cardio', durationMinutes: 10, caloriesBurned: 50 },
+        { type: 'strength', durationMinutes: 20, caloriesBurned: 120 },
+      ]
+
+      expect(buildPerformanceInsights(weeklyData, activities)).toEqual([
+        'You are most active on Mondays.',
+        'You complete 33% of scheduled workouts.',
+        'Keep up the momentum! You are on track this week.',
+      ])
+    })
+
+    it('omits active-day and completion messages when not applicable', () => {
+      const weeklyData = [{ dayName: 'Monday', activities: [] }]
+      const activities: Array<{ type: string; durationMinutes: number; caloriesBurned: number }> =
+        []
+
+      expect(buildPerformanceInsights(weeklyData, activities)).toEqual([
+        'Keep up the momentum! You are on track this week.',
+      ])
+    })
   })
 })

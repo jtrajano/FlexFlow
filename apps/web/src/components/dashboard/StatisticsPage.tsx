@@ -24,6 +24,162 @@ interface GoalAdherenceRowProps {
   completed: number
 }
 
+interface ActivityStatsItem {
+  type: string
+  durationMinutes: number
+  caloriesBurned: number
+}
+
+interface WeeklyActivityDay {
+  dayName: string
+  activities: Array<ActivityStatsItem>
+}
+
+interface DailyStats {
+  totalCalories: number
+  totalMinutes: number
+  totalSteps: number
+}
+
+interface WeeklyStats {
+  weeklyCalories: number
+  avgDailyCalories: number
+  weeklyMinutes: number
+  weeklyWorkouts: number
+  activeDays: number
+  currentStreak: number
+}
+
+interface PersonalRecords {
+  longestWorkout: number
+  highestCaloriesSession: number
+  mostSessionsInWeek: number
+  bestStreak: number
+}
+
+interface WeeklyTrendItem {
+  dayName: string
+  dayCalories: number
+  height: number
+}
+
+export function buildPerformanceInsights(
+  weeklyData: Array<WeeklyActivityDay>,
+  activities: Array<ActivityStatsItem>
+): Array<string> {
+  const result: string[] = []
+
+  const dayActivity = weeklyData.map((day, idx) => ({
+    idx,
+    count: day.activities.length,
+    day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][idx],
+  }))
+  const mostActiveDay = dayActivity.reduce((a, b) => (a.count > b.count ? a : b), dayActivity[0])
+  if (mostActiveDay?.count > 0) {
+    result.push(`You are most active on ${mostActiveDay.day}s.`)
+  }
+
+  const totalScheduledWorkouts = weeklyData.length * 3
+  const completedWorkouts = activities.length
+  const completionRate =
+    totalScheduledWorkouts > 0 ? Math.round((completedWorkouts / totalScheduledWorkouts) * 100) : 0
+  if (completionRate > 0) {
+    result.push(`You complete ${completionRate}% of scheduled workouts.`)
+  }
+
+  result.push('Keep up the momentum! You are on track this week.')
+
+  return result
+}
+
+export function buildDailyStats(completedActivities: Array<ActivityStatsItem>): DailyStats {
+  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
+  const activitySteps = completedActivities.reduce(
+    (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
+    0
+  )
+  const baseSteps = 2500
+
+  return {
+    totalCalories,
+    totalMinutes,
+    totalSteps: baseSteps + activitySteps,
+  }
+}
+
+export function buildWeeklyStats(completedWeeklyData: Array<WeeklyActivityDay>): WeeklyStats {
+  const weeklyCalories = completedWeeklyData.reduce(
+    (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.caloriesBurned, 0),
+    0
+  )
+  const avgDailyCalories =
+    completedWeeklyData.length > 0 ? Math.round(weeklyCalories / completedWeeklyData.length) : 0
+  const weeklyMinutes = completedWeeklyData.reduce(
+    (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.durationMinutes, 0),
+    0
+  )
+  const weeklyWorkouts = completedWeeklyData.reduce((sum, day) => sum + day.activities.length, 0)
+  const activeDays = completedWeeklyData.filter(day => day.activities.length > 0).length
+  const currentStreak = completedWeeklyData.filter(day => day.activities.length > 0).length
+
+  return {
+    weeklyCalories,
+    avgDailyCalories,
+    weeklyMinutes,
+    weeklyWorkouts,
+    activeDays,
+    currentStreak,
+  }
+}
+
+export function buildPersonalRecords(
+  completedWeeklyData: Array<WeeklyActivityDay>,
+  weeklyStats: WeeklyStats
+): PersonalRecords {
+  const allActivities = completedWeeklyData.flatMap(day => day.activities)
+  const longestWorkout = allActivities.reduce(
+    (max, act) => (act.durationMinutes > max ? act.durationMinutes : max),
+    0
+  )
+  const highestCaloriesSession = allActivities.reduce(
+    (max, act) => (act.caloriesBurned > max ? act.caloriesBurned : max),
+    0
+  )
+
+  return {
+    longestWorkout,
+    highestCaloriesSession,
+    mostSessionsInWeek: weeklyStats.weeklyWorkouts,
+    bestStreak: weeklyStats.currentStreak,
+  }
+}
+
+export function buildWeeklyTrendData(
+  completedWeeklyData: Array<WeeklyActivityDay>
+): Array<WeeklyTrendItem> {
+  const caloriesByDay = completedWeeklyData.map(day =>
+    day.activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+  )
+  const maxCalories = Math.max(0, ...caloriesByDay)
+
+  return completedWeeklyData.map((day, index) => {
+    const dayCalories = caloriesByDay[index]
+    const normalizedHeight = maxCalories > 0 ? (dayCalories / maxCalories) * 100 : 0
+    return {
+      dayName: day.dayName,
+      dayCalories,
+      height: dayCalories > 0 ? Math.max(normalizedHeight, 10) : 0,
+    }
+  })
+}
+
+export function formatMinutes(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+}
+
 /** Reusable Stat Card Component */
 function StatCard({
   label,
@@ -117,38 +273,13 @@ function PerformanceInsights({
   weeklyData,
   activities,
 }: {
-  weeklyData: Array<{
-    activities: Array<{ type: string; durationMinutes: number; caloriesBurned: number }>
-  }>
-  activities: Array<{ type: string; durationMinutes: number; caloriesBurned: number }>
+  weeklyData: Array<WeeklyActivityDay>
+  activities: Array<ActivityStatsItem>
 }) {
-  const insights = useMemo(() => {
-    const result: string[] = []
-
-    // Find most active day
-    const dayActivity = weeklyData.map((day, idx) => ({
-      idx,
-      count: day.activities.length,
-      day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][idx],
-    }))
-    const mostActiveDay = dayActivity.reduce((a, b) => (a.count > b.count ? a : b), dayActivity[0])
-    if (mostActiveDay.count > 0) {
-      result.push(`You are most active on ${mostActiveDay.day}s.`)
-    }
-
-    // Workout completion rate
-    const totalScheduledWorkouts = weeklyData.length * 3 // Assume 3 workouts per week planned
-    const completedWorkouts = activities.length
-    const completionRate = Math.round((completedWorkouts / totalScheduledWorkouts) * 100)
-    if (completionRate > 0) {
-      result.push(`You complete ${completionRate}% of scheduled workouts.`)
-    }
-
-    // Consistency improvement (mock - would compare to previous month)
-    result.push('Keep up the momentum! You are on track this week.')
-
-    return result
-  }, [weeklyData, activities])
+  const insights = useMemo(
+    () => buildPerformanceInsights(weeklyData, activities),
+    [weeklyData, activities]
+  )
 
   return (
     <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-4 space-y-2">
@@ -177,97 +308,26 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
     [weeklyData]
   )
 
-  const dailyStats = useMemo(() => {
-    const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-    const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
-    const activitySteps = completedActivities.reduce(
-      (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
-      0
-    )
-    const baseSteps = 2500
-
-    return {
-      totalCalories,
-      totalMinutes,
-      totalSteps: baseSteps + activitySteps,
-    }
-  }, [completedActivities])
+  const dailyStats = useMemo(() => buildDailyStats(completedActivities), [completedActivities])
 
   // Calculate weekly stats
-  const weeklyStats = useMemo(() => {
-    const weeklyCalories = completedWeeklyData.reduce(
-      (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.caloriesBurned, 0),
-      0
-    )
-    const avgDailyCalories =
-      completedWeeklyData.length > 0 ? Math.round(weeklyCalories / completedWeeklyData.length) : 0
-    const weeklyMinutes = completedWeeklyData.reduce(
-      (sum, day) => sum + day.activities.reduce((dSum, act) => dSum + act.durationMinutes, 0),
-      0
-    )
-    const weeklyWorkouts = completedWeeklyData.reduce((sum, day) => sum + day.activities.length, 0)
-    const activeDays = completedWeeklyData.filter(day => day.activities.length > 0).length
-    const currentStreak = completedWeeklyData.filter(day => day.activities.length > 0).length
-
-    return {
-      weeklyCalories,
-      avgDailyCalories,
-      weeklyMinutes,
-      weeklyWorkouts,
-      activeDays,
-      currentStreak,
-    }
-  }, [completedWeeklyData])
+  const weeklyStats = useMemo(() => buildWeeklyStats(completedWeeklyData), [completedWeeklyData])
 
   // Calculate personal records
-  const personalRecords = useMemo(() => {
-    const allActivities = completedWeeklyData.flatMap(day => day.activities)
-
-    const longestWorkout = allActivities.reduce(
-      (max, act) => (act.durationMinutes > max ? act.durationMinutes : max),
-      0
-    )
-    const highestCaloriesSession = allActivities.reduce(
-      (max, act) => (act.caloriesBurned > max ? act.caloriesBurned : max),
-      0
-    )
-    const mostSessionsInWeek = weeklyStats.weeklyWorkouts
-
-    return {
-      longestWorkout,
-      highestCaloriesSession,
-      mostSessionsInWeek,
-      bestStreak: weeklyStats.currentStreak,
-    }
-  }, [completedWeeklyData, weeklyStats])
+  const personalRecords = useMemo(
+    () => buildPersonalRecords(completedWeeklyData, weeklyStats),
+    [completedWeeklyData, weeklyStats]
+  )
 
   // Calculate goal adherence
   // Calculate goal adherence with defaults
   const weeklyWorkoutGoal = 3 // Default to 3 workouts per week
   const weeklyMinutesGoal = 150 // Default to 150 minutes per week
 
-  const weeklyTrendData = useMemo(() => {
-    const caloriesByDay = completedWeeklyData.map(day =>
-      day.activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-    )
-    const maxCalories = Math.max(0, ...caloriesByDay)
-
-    return completedWeeklyData.map((day, index) => {
-      const dayCalories = caloriesByDay[index]
-      const normalizedHeight = maxCalories > 0 ? (dayCalories / maxCalories) * 100 : 0
-      return {
-        dayName: day.dayName,
-        dayCalories,
-        height: dayCalories > 0 ? Math.max(normalizedHeight, 10) : 0,
-      }
-    })
-  }, [completedWeeklyData])
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
-  }
+  const weeklyTrendData = useMemo(
+    () => buildWeeklyTrendData(completedWeeklyData),
+    [completedWeeklyData]
+  )
 
   return (
     <motion.div
@@ -602,7 +662,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
                 <span className="text-xl text-gray-500 ml-2">kcal</span>
               </h3>
               <div className="inline-block bg-black/30 backdrop-blur-sm border border-white/5 rounded-full px-4 py-1.5 text-xs text-gray-300 font-medium">
-                🔥 {formatTime(dailyStats.totalMinutes)} active time
+                🔥 {formatMinutes(dailyStats.totalMinutes)} active time
               </div>
             </div>
           </motion.div>
