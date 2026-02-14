@@ -132,6 +132,7 @@ function WorkoutDistributionChart({
   const slices = Object.entries(distribution).map(([type, count], idx) => {
     const percentage = ((count as number) / total) * 100
     const angle = (percentage / 100) * 360
+    const isFullSlice = angle >= 359.999
     const endAngle = startAngle + angle
 
     const start = startAngle * (Math.PI / 180)
@@ -144,7 +145,7 @@ function WorkoutDistributionChart({
 
     const largeArc = angle > 180 ? 1 : 0
 
-    const path = `M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`
+    const path = isFullSlice ? '' : `M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`
 
     startAngle = endAngle
 
@@ -153,6 +154,7 @@ function WorkoutDistributionChart({
       percentage: Math.round(percentage),
       path,
       color: colors[idx % colors.length],
+      isFullSlice,
     }
   })
 
@@ -164,9 +166,13 @@ function WorkoutDistributionChart({
     <div className="bg-gray-900/50 border border-white/5 rounded-2xl p-6">
       <div className="flex items-center gap-6">
         <svg width="150" height="150" viewBox="0 0 100 100" className="flex-shrink-0">
-          {slices.map((slice, idx) => (
-            <path key={idx} d={slice.path} fill={slice.color} opacity="0.8" />
-          ))}
+          {slices.map((slice, idx) =>
+            slice.isFullSlice ? (
+              <circle key={idx} cx="50" cy="50" r="40" fill={slice.color} opacity="0.8" />
+            ) : (
+              <path key={idx} d={slice.path} fill={slice.color} opacity="0.8" />
+            )
+          )}
         </svg>
 
         <div className="flex-1 space-y-2">
