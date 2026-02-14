@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { signOut } from 'firebase/auth'
@@ -41,51 +41,60 @@ export function Onboarding({ onComplete, onSaveGoals }: OnboardingProps) {
   const [lastSavedGoalId, setLastSavedGoalId] = useState<string | null>(null)
 
   const totalSteps = 6
-  const progress = (currentStep / totalSteps) * 100
+  const progress = useMemo(() => (currentStep / totalSteps) * 100, [currentStep, totalSteps])
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut(auth)
       window.location.reload()
     } catch (error) {
       console.error('Error signing out:', error)
     }
-  }
+  }, [])
 
-  const handleNext = (stepData: Partial<OnboardingData>) => {
-    const updatedData = { ...data, ...stepData }
-    setData(updatedData)
+  const handleNext = useCallback(
+    (stepData: Partial<OnboardingData>) => {
+      const updatedData = { ...data, ...stepData }
+      setData(updatedData)
 
-    if (currentStep < totalSteps) {
-      // If we are moving from Step 4 (Preferences) to Step 5 (Recommendation),
-      // save the automated computation record.
-      if (currentStep === 4) {
-        const targets = calculateTargets(updatedData)
-        onSaveGoals(updatedData, targets)
-          .then(id => {
-            if (typeof id === 'string') setLastSavedGoalId(id)
-          })
-          .catch(err => console.error('Error saving initial goals:', err))
+      if (currentStep < totalSteps) {
+        // If we are moving from Step 4 (Preferences) to Step 5 (Recommendation),
+        // save the automated computation record.
+        if (currentStep === 4) {
+          const targets = calculateTargets(updatedData)
+          onSaveGoals(updatedData, targets)
+            .then(id => {
+              if (typeof id === 'string') setLastSavedGoalId(id)
+            })
+            .catch(err => console.error('Error saving initial goals:', err))
+        }
+        setCurrentStep(step => step + 1)
       }
-      setCurrentStep(currentStep + 1)
-    }
-  }
+    },
+    [currentStep, data, onSaveGoals, totalSteps]
+  )
 
-  const handleRecommendationComplete = (targets: FitnessTargets, hasChanges: boolean) => {
-    setFinalTargets(targets)
-    setHasChangesFlag(hasChanges)
-    setCurrentStep(currentStep + 1)
-  }
+  const handleRecommendationComplete = useCallback(
+    (targets: FitnessTargets, hasChanges: boolean) => {
+      setFinalTargets(targets)
+      setHasChangesFlag(hasChanges)
+      setCurrentStep(step => step + 1)
+    },
+    []
+  )
 
-  const handleScheduleComplete = (schedule: WorkoutScheduleItem[]) => {
-    onComplete(data, finalTargets!, hasChangesFlag, schedule, lastSavedGoalId || undefined)
-  }
+  const handleScheduleComplete = useCallback(
+    (schedule: WorkoutScheduleItem[]) => {
+      onComplete(data, finalTargets!, hasChangesFlag, schedule, lastSavedGoalId || undefined)
+    },
+    [data, finalTargets, hasChangesFlag, lastSavedGoalId, onComplete]
+  )
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(step => step - 1)
     }
-  }
+  }, [currentStep])
 
   return (
     <div className="min-h-screen bg-background text-foreground">

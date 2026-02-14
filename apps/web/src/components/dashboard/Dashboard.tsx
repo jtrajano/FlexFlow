@@ -50,7 +50,7 @@ export function Dashboard() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 py-6 min-h-screen pb-28">{renderContent()}</div>
+      <div className="min-h-screen bg-background pb-24">{renderContent()}</div>
 
       {activeTab !== 'workouts' &&
         activeTab !== 'log-activity' &&

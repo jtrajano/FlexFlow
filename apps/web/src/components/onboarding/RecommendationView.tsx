@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   OnboardingData,
@@ -14,79 +14,83 @@ interface RecommendationViewProps {
 }
 
 export function RecommendationView({ data, onComplete, onBack }: RecommendationViewProps) {
-  const [targets, setTargets] = useState<FitnessTargets>(() => calculateTargets(data))
+  const baselineTargets = useMemo(() => calculateTargets(data), [data])
+  const [targets, setTargets] = useState<FitnessTargets>(() => baselineTargets)
   const [isEditing, setIsEditing] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
-  const handleUpdateDistribution = (
-    index: number,
-    field: keyof WorkoutTypeDistribution,
-    value: string | number
-  ) => {
-    const newDist = [...targets.workoutTypeDistribution]
-    newDist[index] = { ...newDist[index], [field]: value }
+  const handleUpdateDistribution = useCallback(
+    (index: number, field: keyof WorkoutTypeDistribution, value: string | number) => {
+      setHasChanges(true)
+      setTargets(currentTargets => {
+        const newDist = [...currentTargets.workoutTypeDistribution]
+        newDist[index] = { ...newDist[index], [field]: value }
 
-    setHasChanges(true)
-    // Recalculate totals based on the new distribution
-    setTargets({
-      ...targets,
-      workoutTypeDistribution: newDist,
-      weeklyWorkoutMinutes: newDist.reduce(
-        (acc, curr) => acc + (Number(curr.weeklyMinutes) || 0),
-        0
-      ),
-      weeklyWorkoutFrequencyTarget: newDist.reduce(
-        (acc, curr) => acc + (Number(curr.weeklySessions) || 0),
-        0
-      ),
-    })
-  }
+        return {
+          ...currentTargets,
+          workoutTypeDistribution: newDist,
+          weeklyWorkoutMinutes: newDist.reduce(
+            (acc, curr) => acc + (Number(curr.weeklyMinutes) || 0),
+            0
+          ),
+          weeklyWorkoutFrequencyTarget: newDist.reduce(
+            (acc, curr) => acc + (Number(curr.weeklySessions) || 0),
+            0
+          ),
+        }
+      })
+    },
+    []
+  )
 
-  const handleReset = () => {
-    setTargets(calculateTargets(data))
+  const handleReset = useCallback(() => {
+    setTargets(baselineTargets)
     setIsEditing(false)
     setHasChanges(false)
-  }
+  }, [baselineTargets])
 
-  const handleUpdateDirect = (field: keyof FitnessTargets, value: number) => {
-    const updatedTargets = { ...targets, [field]: value }
-    setHasChanges(true)
+  const handleUpdateDirect = useCallback(
+    (field: keyof FitnessTargets, value: number) => {
+      setHasChanges(true)
+      setTargets(currentTargets => {
+        const updatedTargets = { ...currentTargets, [field]: value }
 
-    // If we're updating the total minutes or sessions, scale the distribution
-    if (field === 'weeklyWorkoutMinutes' || field === 'weeklyWorkoutFrequencyTarget') {
-      const isMinutes = field === 'weeklyWorkoutMinutes'
+        // If we're updating the total minutes or sessions, scale the distribution
+        if (field === 'weeklyWorkoutMinutes' || field === 'weeklyWorkoutFrequencyTarget') {
+          const isMinutes = field === 'weeklyWorkoutMinutes'
 
-      // We calculate ratios based on the initial calculation to avoid compounding rounding errors
-      // or collapsing to 0.
-      const initial = calculateTargets(data)
-      const initialDist = initial.workoutTypeDistribution
-      const initialTotal = isMinutes
-        ? initial.weeklyWorkoutMinutes
-        : initial.weeklyWorkoutFrequencyTarget
+          // Use the baseline calculation to preserve type ratios and avoid compounding edits.
+          const initialDist = baselineTargets.workoutTypeDistribution
+          const initialTotal = isMinutes
+            ? baselineTargets.weeklyWorkoutMinutes
+            : baselineTargets.weeklyWorkoutFrequencyTarget
 
-      if (value > 0 && initialTotal > 0) {
-        let remaining = value
-        updatedTargets.workoutTypeDistribution = initialDist.map((dist, idx) => {
-          if (idx === initialDist.length - 1) {
-            return {
-              ...dist,
-              [isMinutes ? 'weeklyMinutes' : 'weeklySessions']: Math.max(0, remaining),
-            }
+          if (value > 0 && initialTotal > 0) {
+            let remaining = value
+            updatedTargets.workoutTypeDistribution = initialDist.map((dist, idx) => {
+              if (idx === initialDist.length - 1) {
+                return {
+                  ...dist,
+                  [isMinutes ? 'weeklyMinutes' : 'weeklySessions']: Math.max(0, remaining),
+                }
+              }
+              const ratio = (isMinutes ? dist.weeklyMinutes : dist.weeklySessions) / initialTotal
+              const share = Math.round(ratio * value)
+              const actualShare = Math.min(share, remaining)
+              remaining -= actualShare
+              return {
+                ...dist,
+                [isMinutes ? 'weeklyMinutes' : 'weeklySessions']: actualShare,
+              }
+            })
           }
-          const ratio = (isMinutes ? dist.weeklyMinutes : dist.weeklySessions) / initialTotal
-          const share = Math.round(ratio * value)
-          const actualShare = Math.min(share, remaining)
-          remaining -= actualShare
-          return {
-            ...dist,
-            [isMinutes ? 'weeklyMinutes' : 'weeklySessions']: actualShare,
-          }
-        })
-      }
-    }
+        }
 
-    setTargets(updatedTargets)
-  }
+        return updatedTargets
+      })
+    },
+    [baselineTargets]
+  )
 
   return (
     <motion.div

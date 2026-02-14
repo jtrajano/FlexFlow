@@ -17,6 +17,12 @@ interface StatCardProps {
   description?: string
 }
 
+interface GoalAdherenceRowProps {
+  label: string
+  planned: number
+  completed: number
+}
+
 /** Reusable Stat Card Component */
 function StatCard({
   label,
@@ -63,6 +69,24 @@ function StatCard({
         {description && <p className="text-xs text-gray-500 mt-2">{description}</p>}
       </div>
     </motion.div>
+  )
+}
+
+function GoalAdherenceRow({ label, planned, completed }: GoalAdherenceRowProps) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
+      <span className="text-sm text-gray-300">{label}</span>
+      <div className="flex gap-4">
+        <div className="text-right">
+          <p className="text-xs text-gray-500">Planned</p>
+          <p className="text-sm font-bold text-white">{planned}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-gray-500">Completed</p>
+          <p className="text-sm font-bold text-[#a3e635]">{completed}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -216,21 +240,31 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
   const { data: activities = [] } = useTodayActivity(user?.uid)
   const { data: weeklyData = [] } = useWeeklyActivity(user?.uid)
   const { data: metrics } = useLatestBodyMetrics(user?.uid)
-  const completedActivities = activities.filter(isCompletedActivity)
-  const completedWeeklyData = weeklyData.map(day => ({
-    ...day,
-    activities: day.activities.filter(isCompletedActivity),
-  }))
-
-  // Calculate today's stats
-  const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-  const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
-  const activitySteps = completedActivities.reduce(
-    (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
-    0
+  const completedActivities = useMemo(() => activities.filter(isCompletedActivity), [activities])
+  const completedWeeklyData = useMemo(
+    () =>
+      weeklyData.map(day => ({
+        ...day,
+        activities: day.activities.filter(isCompletedActivity),
+      })),
+    [weeklyData]
   )
-  const baseSteps = 2500
-  const totalSteps = baseSteps + activitySteps
+
+  const dailyStats = useMemo(() => {
+    const totalCalories = completedActivities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+    const totalMinutes = completedActivities.reduce((sum, act) => sum + act.durationMinutes, 0)
+    const activitySteps = completedActivities.reduce(
+      (sum, act) => sum + estimateSteps(act.type, act.durationMinutes),
+      0
+    )
+    const baseSteps = 2500
+
+    return {
+      totalCalories,
+      totalMinutes,
+      totalSteps: baseSteps + activitySteps,
+    }
+  }, [completedActivities])
 
   // Calculate weekly stats
   const weeklyStats = useMemo(() => {
@@ -285,29 +319,22 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
   const weeklyWorkoutGoal = 3 // Default to 3 workouts per week
   const weeklyMinutesGoal = 150 // Default to 150 minutes per week
 
-  const GoalAdherenceRow = ({
-    label,
-    planned,
-    completed,
-  }: {
-    label: string
-    planned: number
-    completed: number
-  }) => (
-    <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
-      <span className="text-sm text-gray-300">{label}</span>
-      <div className="flex gap-4">
-        <div className="text-right">
-          <p className="text-xs text-gray-500">Planned</p>
-          <p className="text-sm font-bold text-white">{planned}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-500">Completed</p>
-          <p className="text-sm font-bold text-[#a3e635]">{completed}</p>
-        </div>
-      </div>
-    </div>
-  )
+  const weeklyTrendData = useMemo(() => {
+    const caloriesByDay = completedWeeklyData.map(day =>
+      day.activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
+    )
+    const maxCalories = Math.max(0, ...caloriesByDay)
+
+    return completedWeeklyData.map((day, index) => {
+      const dayCalories = caloriesByDay[index]
+      const normalizedHeight = maxCalories > 0 ? (dayCalories / maxCalories) * 100 : 0
+      return {
+        dayName: day.dayName,
+        dayCalories,
+        height: dayCalories > 0 ? Math.max(normalizedHeight, 10) : 0,
+      }
+    })
+  }, [completedWeeklyData])
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -490,27 +517,14 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
           <div className="bg-gray-900/50 border border-white/5 rounded-2xl p-6">
             <div className="grid grid-cols-7 gap-2">
               {weeklyData.length > 0 ? (
-                completedWeeklyData.map((day, index) => {
-                  const dayCalories = day.activities.reduce(
-                    (sum, act) => sum + act.caloriesBurned,
-                    0
-                  )
-                  const maxCalories = Math.max(
-                    ...completedWeeklyData.map(d =>
-                      d.activities.reduce((sum, act) => sum + act.caloriesBurned, 0)
-                    )
-                  )
-                  const height = maxCalories > 0 ? (dayCalories / maxCalories) * 100 : 0
-
-                  return (
-                    <ChartBar
-                      key={index}
-                      height={dayCalories > 0 ? Math.max(height, 10) : 0}
-                      label={day.dayName}
-                      value={dayCalories}
-                    />
-                  )
-                })
+                weeklyTrendData.map((day, index) => (
+                  <ChartBar
+                    key={index}
+                    height={day.height}
+                    label={day.dayName}
+                    value={day.dayCalories}
+                  />
+                ))
               ) : (
                 <div className="col-span-7 text-center p-8 text-gray-400 text-sm">
                   No weekly data available yet. Start logging workouts!
@@ -657,11 +671,11 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
                 Total Energy Burned
               </p>
               <h3 className="text-5xl font-black text-white">
-                {totalCalories}
+                {dailyStats.totalCalories}
                 <span className="text-xl text-gray-500 ml-2">kcal</span>
               </h3>
               <div className="inline-block bg-black/30 backdrop-blur-sm border border-white/5 rounded-full px-4 py-1.5 text-xs text-gray-300 font-medium">
-                🔥 {formatTime(totalMinutes)} active time
+                🔥 {formatTime(dailyStats.totalMinutes)} active time
               </div>
             </div>
           </motion.div>
@@ -669,7 +683,7 @@ export function StatisticsPage({ onBack }: { onBack?: () => void }) {
           <div className="grid grid-cols-2 gap-4">
             <StatCard
               label="Steps"
-              value={totalSteps.toLocaleString()}
+              value={dailyStats.totalSteps.toLocaleString()}
               unit="steps"
               color="bg-blue-400"
               icon={
