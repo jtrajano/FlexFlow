@@ -27,12 +27,10 @@ Current fitness applications suffer from:
 ### 🏋️ The "Smart" Logger
 
 - **Reactive UI:** Logging system that saves data per-set (debounced) to prevent data loss, directly to Firestore.
-- **Rest Timer:** Automatic countdowns between sets with haptic feedback/notifications.
 - **Exercise Library:** A searchable database of 200+ movements with video demonstrations.
 
 ### 🔋 Recovery Dashboard
 
-- **Readiness Score:** A daily 1–100 score calculated via wearable integration (Apple Health/Google Fit).
 - **The "Nudge":** AI suggestions at the start of a workout.
   > _Example: "Your sleep was low; we've reduced your squat targets by 10% today."_
 
@@ -57,9 +55,8 @@ Current fitness applications suffer from:
 ## 5. User Journey
 
 1. **Onboarding:** User connects wearable data and selects a training focus.
-2. **Pre-Workout:** User views their **Readiness Score** on the home dashboard.
-3. **Active Workout:** User logs sets; app provides **Previous Lift** data for progressive overload.
-4. **Post-Workout:** A summary card highlights PRs (Personal Records) and total volume.
+2. **Active Workout:** User logs sets; app provides **Previous Lift** data for progressive overload.
+3. **Post-Workout:** A summary card highlights PRs (Personal Records) and total volume.
 
 ---
 
@@ -73,6 +70,5 @@ Current fitness applications suffer from:
 
 ## 7. Future Roadmap
 
-- [ ] **V1.1:** Direct bi-directional sync with Garmin and Oura.
-- [ ] **V1.2:** Computer Vision for squat depth and form analysis.
-- [ ] **V2.0:** Marketplace for professional coaches to sell premium programs.
+- [ ] **Pre-Workout:** User views their **Readiness Score** on the home dashboard.
+- [ ] - **Rest Timer:** Automatic countdowns between sets with haptic feedback/notifications.
