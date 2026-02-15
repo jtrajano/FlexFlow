@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { addDoc, collection } from 'firebase/firestore'
 import { useQueryClient } from '@tanstack/react-query'
 import { calculateActivityCalories } from '@repo/shared'
-import { useAuth } from '../../hooks/useAuth'
-import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
-import { db } from '../../lib/firebase'
+import { useAuth } from '../hooks/useAuth'
+import { useLatestBodyMetrics } from '../hooks/useBodyMetrics'
+import { db } from '../lib/firebase'
 
 interface ManualActivityModalProps {
   isOpen: boolean

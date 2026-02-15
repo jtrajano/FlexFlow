@@ -2,10 +2,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { StatisticsPage } from './StatisticsPage'
-import { useAuth } from '../../hooks/useAuth'
-import { useTodayActivity } from '../../hooks/useTodayActivity'
-import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
-import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { useAuth } from '../hooks/useAuth'
+import { useTodayActivity } from '../hooks/useTodayActivity'
+import { useWeeklyActivity } from '../hooks/useWeeklyActivity'
+import { useLatestBodyMetrics } from '../hooks/useBodyMetrics'
 import { estimateSteps } from '@repo/shared'
 import {
   buildDailyStats,
@@ -17,10 +17,10 @@ import {
 } from './StatisticsPage'
 
 // Mock all hooks
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useTodayActivity')
-vi.mock('../../hooks/useWeeklyActivity')
-vi.mock('../../hooks/useBodyMetrics')
+vi.mock('../hooks/useAuth')
+vi.mock('../hooks/useTodayActivity')
+vi.mock('../hooks/useWeeklyActivity')
+vi.mock('../hooks/useBodyMetrics')
 
 // Mock Framer Motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({

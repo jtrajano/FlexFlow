@@ -2,23 +2,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { Dashboard } from './Dashboard'
-import { useAuth } from '../../hooks/useAuth'
-import { useTodayActivity } from '../../hooks/useTodayActivity'
-import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
-import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { useAuth } from '../hooks/useAuth'
+import { useTodayActivity } from '../hooks/useTodayActivity'
+import { useWeeklyActivity } from '../hooks/useWeeklyActivity'
+import { useLatestBodyMetrics } from '../hooks/useBodyMetrics'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Mock all hooks
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useTodayActivity')
-vi.mock('../../hooks/useWeeklyActivity')
-vi.mock('../../hooks/useBodyMetrics')
-vi.mock('../../hooks/useUserGoals', () => ({
+vi.mock('../hooks/useAuth')
+vi.mock('../hooks/useTodayActivity')
+vi.mock('../hooks/useWeeklyActivity')
+vi.mock('../hooks/useBodyMetrics')
+vi.mock('../hooks/useUserGoals', () => ({
   useUserGoals: vi.fn(() => ({ data: null, isLoading: false })),
 }))
 
 // Mock Firebase
-vi.mock('../../lib/firebase', () => ({
+vi.mock('../lib/firebase', () => ({
   db: {},
 }))
 
@@ -28,6 +28,7 @@ const createMockDocSnap = (data: any) => ({
 })
 
 vi.mock('firebase/firestore', () => ({
+  getFirestore: vi.fn(() => ({})),
   doc: vi.fn(),
   getDoc: vi.fn(() =>
     Promise.resolve(

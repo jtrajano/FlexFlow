@@ -1,24 +1,23 @@
 import { useState } from 'react'
-import { GreetingHeader } from './GreetingHeader'
-import { GoalCard } from './GoalCard'
-import { ProgressSection } from './ProgressSection'
-import { StatsSection } from './StatsSection'
-import { RecommendedSection } from './RecommendedSection'
+import { GreetingHeader } from '../components/dashboard/GreetingHeader'
+import { GoalCard } from '../components/dashboard/GoalCard'
+import { ProgressSection } from '../components/dashboard/ProgressSection'
+import { StatsSection } from '../components/dashboard/StatsSection'
+import { RecommendedSection } from '../components/dashboard/RecommendedSection'
 import { WeeklyActivitySection } from './WeeklyActivitySection'
-import { BottomNav } from './BottomNav'
-import { LogActivityModal } from './LogActivityModal'
+import { BottomNav } from '../components/dashboard/BottomNav'
 import { WorkoutsView } from './WorkoutsView'
 import { LogActivityView } from './LogActivityView'
 import { StatisticsPage } from './StatisticsPage'
 import { ProfileView } from './ProfileView'
 import { ActivityHistoryView } from './ActivityHistoryView'
-import { useAuth } from '../../hooks/useAuth'
-import { useRunningActivity } from '../../hooks/useRunningActivity'
+import { useAuth } from '../hooks/useAuth'
+import { useRunningActivity } from '../hooks/useRunningActivity'
 
 export function Dashboard() {
   const { user } = useAuth()
   const { data: runningActivity } = useRunningActivity(user?.uid)
-  const [showLogModal, setShowLogModal] = useState(false)
+
   const [activeTab, setActiveTab] = useState('home')
 
   const renderContent = () => {
@@ -64,7 +63,6 @@ export function Dashboard() {
             isAddDisabled={!!runningActivity}
           />
         )}
-      <LogActivityModal isOpen={showLogModal} onClose={() => setShowLogModal(false)} />
     </>
   )
 }

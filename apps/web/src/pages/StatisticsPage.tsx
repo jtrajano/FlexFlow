@@ -1,67 +1,21 @@
 import { motion } from 'framer-motion'
 import { useMemo } from 'react'
-import { useAuth } from '../../hooks/useAuth'
-import { useTodayActivity } from '../../hooks/useTodayActivity'
-import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
-import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { useAuth } from '../hooks/useAuth'
+import { useTodayActivity } from '../hooks/useTodayActivity'
+import { useWeeklyActivity } from '../hooks/useWeeklyActivity'
+import { useLatestBodyMetrics } from '../hooks/useBodyMetrics'
 import { estimateSteps } from '@repo/shared'
-import { isCompletedActivity } from '../../utils/activity-log'
-import { WorkoutDistributionChart } from './WorkoutDistributionChart'
-
-interface StatCardProps {
-  label: string
-  value: string | number
-  unit: string
-  icon: React.ReactNode
-  color?: string
-  trend?: { value: number; isPositive: boolean }
-  description?: string
-}
-
-interface GoalAdherenceRowProps {
-  label: string
-  planned: number
-  completed: number
-}
-
-interface ActivityStatsItem {
-  type: string
-  durationMinutes: number
-  caloriesBurned: number
-}
-
-interface WeeklyActivityDay {
-  dayName: string
-  activities: Array<ActivityStatsItem>
-}
-
-interface DailyStats {
-  totalCalories: number
-  totalMinutes: number
-  totalSteps: number
-}
-
-interface WeeklyStats {
-  weeklyCalories: number
-  avgDailyCalories: number
-  weeklyMinutes: number
-  weeklyWorkouts: number
-  activeDays: number
-  currentStreak: number
-}
-
-interface PersonalRecords {
-  longestWorkout: number
-  highestCaloriesSession: number
-  mostSessionsInWeek: number
-  bestStreak: number
-}
-
-interface WeeklyTrendItem {
-  dayName: string
-  dayCalories: number
-  height: number
-}
+import { isCompletedActivity } from '../utils/activity-log'
+import { WorkoutDistributionChart } from '../components/statistics/WorkoutDistributionChart'
+import { WeeklyActivityDay } from '../interface/WeeklyActivityDay'
+import { ActivityStatsItem } from '../interface/ActivityStatsItem'
+import { DailyStats } from '../interface/DailyStats'
+import { WeeklyStats } from '../interface/WeeklyStats'
+import { PersonalRecords } from '../interface/PersonalRecords'
+import { WeeklyTrendItem } from '../interface/WeeklyTrendItem'
+import { GoalAdherenceRowProps } from '../interface/GoalAdherenceRowProps'
+import { StatCard } from '../components/statistics/StatCard'
+import { PerformanceInsights } from '../components/statistics/PerformanceInsights'
 
 export function buildPerformanceInsights(
   weeklyData: Array<WeeklyActivityDay>,
@@ -181,53 +135,6 @@ export function formatMinutes(minutes: number): string {
 }
 
 /** Reusable Stat Card Component */
-function StatCard({
-  label,
-  value,
-  unit,
-  icon,
-  color = 'bg-[#a3e635]',
-  trend,
-  description,
-}: StatCardProps) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className="bg-gray-900/50 backdrop-blur-md border border-white/10 p-5 rounded-2xl relative overflow-hidden group hover:border-white/20 transition-all"
-    >
-      <div
-        className={`absolute top-0 right-0 w-24 h-24 ${color} opacity-5 blur-2xl -mr-10 -mt-10 rounded-full group-hover:opacity-10 transition-opacity`}
-      />
-
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-3">
-          <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">{label}</span>
-          <div
-            className={`p-2 rounded-xl bg-white/5 text-white ${color.replace('bg-', 'text-')}/80`}
-          >
-            {icon}
-          </div>
-        </div>
-
-        <div className="flex items-baseline gap-1 mb-1">
-          <h3 className="text-2xl font-black text-white tracking-tight">{value}</h3>
-          <span className="text-xs font-medium text-gray-500">{unit}</span>
-        </div>
-
-        {trend && (
-          <div
-            className={`text-xs font-semibold flex items-center gap-1 ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}
-          >
-            <span>{trend.isPositive ? '↑' : '↓'}</span>
-            <span>{Math.abs(trend.value)}% vs last week</span>
-          </div>
-        )}
-
-        {description && <p className="text-xs text-gray-500 mt-2">{description}</p>}
-      </div>
-    </motion.div>
-  )
-}
 
 function GoalAdherenceRow({ label, planned, completed }: GoalAdherenceRowProps) {
   return (
@@ -269,29 +176,6 @@ function ChartBar({ height, label, value }: { height: number; label: string; val
 }
 
 /** Performance Insights */
-function PerformanceInsights({
-  weeklyData,
-  activities,
-}: {
-  weeklyData: Array<WeeklyActivityDay>
-  activities: Array<ActivityStatsItem>
-}) {
-  const insights = useMemo(
-    () => buildPerformanceInsights(weeklyData, activities),
-    [weeklyData, activities]
-  )
-
-  return (
-    <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-4 space-y-2">
-      {insights.map((insight, idx) => (
-        <div key={idx} className="flex items-start gap-2">
-          <span className="text-indigo-400 font-black">💡</span>
-          <p className="text-sm text-gray-200">{insight}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function StatisticsPage({ onBack }: { onBack?: () => void }) {
   const { user } = useAuth()

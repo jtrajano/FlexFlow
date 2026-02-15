@@ -2,11 +2,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ActivityHistoryView } from './ActivityHistoryView'
-import { useAuth } from '../../hooks/useAuth'
-import { useActivityHistory } from '../../hooks/useActivityHistory'
+import { useAuth } from '../hooks/useAuth'
+import { useActivityHistory } from '../hooks/useActivityHistory'
 
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useActivityHistory')
+vi.mock('../hooks/useAuth')
+vi.mock('../hooks/useActivityHistory')
 
 const mockUser = {
   uid: 'user-1',

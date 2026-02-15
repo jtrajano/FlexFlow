@@ -126,7 +126,8 @@ describe('App', () => {
       error: null,
     })
     render(<App />, { wrapper: createWrapper() })
-    expect(screen.getByText(/Welcome to FlexFlow/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Welcome to/i })).toBeInTheDocument()
+    expect(screen.getByText(/FlexFlow/i)).toBeInTheDocument()
     expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument()
   })
 

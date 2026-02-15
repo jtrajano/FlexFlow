@@ -2,18 +2,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ProfileView } from './ProfileView'
-import { useAuth } from '../../hooks/useAuth'
-import { useUserGoals } from '../../hooks/useUserGoals'
-import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
+import { useAuth } from '../hooks/useAuth'
+import { useUserGoals } from '../hooks/useUserGoals'
+import { useLatestBodyMetrics } from '../hooks/useBodyMetrics'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Mock all hooks
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useUserGoals')
-vi.mock('../../hooks/useBodyMetrics')
+vi.mock('../hooks/useAuth')
+vi.mock('../hooks/useUserGoals')
+vi.mock('../hooks/useBodyMetrics')
 
 // Mock Firebase
-vi.mock('../../lib/firebase', () => ({
+vi.mock('../lib/firebase', () => ({
   db: {},
 }))
 

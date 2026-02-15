@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { doc, updateDoc } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
+import { db } from '../lib/firebase'
 import { ActivityLog } from '@repo/shared'
 
 interface WorkoutCompletedModalProps {

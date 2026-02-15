@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
-import { useActivityHistory } from '../../hooks/useActivityHistory'
-import { getActivityDurationMinutes, getActivityStatus } from '../../utils/activity-log'
+import { useAuth } from '../hooks/useAuth'
+import { useActivityHistory } from '../hooks/useActivityHistory'
+import { getActivityDurationMinutes, getActivityStatus } from '../utils/activity-log'
 
 function formatDateTime(value?: string): string {
   if (!value) return '-'

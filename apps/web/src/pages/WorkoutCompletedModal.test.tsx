@@ -3,10 +3,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { WorkoutCompletedModal } from './WorkoutCompletedModal'
 
-const mockUpdateDoc = vi.fn()
-const mockDoc = vi.fn(() => ({ id: 'activity-1-ref' }))
+const { mockUpdateDoc, mockDoc } = vi.hoisted(() => ({
+  mockUpdateDoc: vi.fn(),
+  mockDoc: vi.fn(() => ({ id: 'activity-1-ref' })),
+}))
 
-vi.mock('../../lib/firebase', () => ({
+vi.mock('../lib/firebase', () => ({
   db: {},
 }))
 

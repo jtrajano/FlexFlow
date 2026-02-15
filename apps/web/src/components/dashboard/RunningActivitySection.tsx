@@ -7,7 +7,7 @@ import { useRunningActivity } from '../../hooks/useRunningActivity'
 import { useLatestBodyMetrics } from '../../hooks/useBodyMetrics'
 import { getActivityDurationMinutes } from '../../utils/activity-log'
 import { db } from '../../lib/firebase'
-import { WorkoutCompletedModal } from './WorkoutCompletedModal'
+import { WorkoutCompletedModal } from '../../pages/WorkoutCompletedModal'
 
 interface RunningActivitySectionProps {
   className?: string

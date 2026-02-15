@@ -55,7 +55,7 @@ import { OnboardingData, calculateTargets, FitnessTargets, WorkoutScheduleItem }
 
 import { useAuth } from './hooks/useAuth'
 import { LoginView } from './components/auth/LoginView'
-import { Dashboard } from './components/dashboard/Dashboard'
+import { Dashboard } from './pages/Dashboard'
 import { Onboarding } from './components/onboarding/Onboarding'
 import { OnboardingSuccessView } from './components/onboarding/OnboardingSuccessView'
 

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { collection, addDoc } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
-import { useAuth } from '../../hooks/useAuth'
+import { db } from '../lib/firebase'
+import { useAuth } from '../hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRunningActivity } from '../../hooks/useRunningActivity'
+import { useRunningActivity } from '../hooks/useRunningActivity'
 import { ManualActivityModal } from './ManualActivityModal'
 
 const activities = [

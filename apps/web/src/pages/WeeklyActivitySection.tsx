@@ -1,7 +1,7 @@
-import { useAuth } from '../../hooks/useAuth'
-import { useWeeklyActivity } from '../../hooks/useWeeklyActivity'
-import { useUserGoals } from '../../hooks/useUserGoals'
-import { isCompletedActivity } from '../../utils/activity-log'
+import { useAuth } from '../hooks/useAuth'
+import { useWeeklyActivity } from '../hooks/useWeeklyActivity'
+import { useUserGoals } from '../hooks/useUserGoals'
+import { isCompletedActivity } from '../utils/activity-log'
 
 interface DayBarProps {
   day: string

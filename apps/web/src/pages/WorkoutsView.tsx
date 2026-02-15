@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import { WorkoutScheduleItem, WorkoutTypeDistribution } from '@repo/shared'
-import { useAuth } from '../../hooks/useAuth'
-import { useUserSchedule } from '../../hooks/useUserSchedule'
-import { useUserGoals } from '../../hooks/useUserGoals'
+import { useAuth } from '../hooks/useAuth'
+import { useUserSchedule } from '../hooks/useUserSchedule'
+import { useUserGoals } from '../hooks/useUserGoals'
 import { doc, setDoc, collection } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
+import { db } from '../lib/firebase'
 
 export function WorkoutsView({ onBack }: { onBack: () => void }) {
   const { user } = useAuth()
